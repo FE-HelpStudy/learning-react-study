@@ -82,7 +82,7 @@
     
     최상위 컴포넌트의 렌더링 작업이 끝나면 지니고 있는 정보들을 사용하여 HTML 마크업을 만들고, 이를 우리가 정하는 실제 페이지의 DOM 요소 안에 주입합니다.
     
-    ![IMG_635DEB5F55E6-1.jpeg](https://prod-files-secure.s3.us-west-2.amazonaws.com/e46d05f9-c4e8-4396-90c3-5586bb8dab2c/d88a3fbb-a34e-424c-94b8-e0027daf6c81/IMG_635DEB5F55E6-1.jpeg)
+    ![1.jpeg](./img/1.jpeg)
     
     ## **1.1.1.2 조화 과정**
     
@@ -97,7 +97,7 @@
         (따라서 “조화 과정을 거친다”는 표현이 더 적합)
         
 
-![IMG_93F2EAD5A4A9-1.jpeg](https://prod-files-secure.s3.us-west-2.amazonaws.com/e46d05f9-c4e8-4396-90c3-5586bb8dab2c/c2d3c122-14a2-4bb2-8be2-5a29223615ae/IMG_93F2EAD5A4A9-1.jpeg)
+![2.jpeg](./img/2.jpeg)
 
 render 함수가 반환하는 결과를 곧바로 DOM에 적용하지 않음
 
@@ -208,7 +208,7 @@ render 함수가 반환하는 결과를 곧바로 DOM에 적용하지 않음
 
 **확장 프로그램 설치 안하는 경우**
 
-[2장에 기술](https://www.notion.so/6da36161058b44478d01462174d373ac?pvs=21)
+**2장에 기술**
 
 ## 프로젝트 생성
 

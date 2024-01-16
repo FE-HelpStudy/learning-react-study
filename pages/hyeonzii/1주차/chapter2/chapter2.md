@@ -202,7 +202,7 @@ npm install eslint --save-dev
 npx eslint --init 
 ```
 
-![스크린샷 2023-08-23 오전 2.51.24.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/e46d05f9-c4e8-4396-90c3-5586bb8dab2c/78aa0d20-7f1e-41d8-8030-fee024b5e0b0/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-08-23_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_2.51.24.png)
+![1.png](./img/1.png)
 
 1. .eslintrc.json 파일도 수정
 
