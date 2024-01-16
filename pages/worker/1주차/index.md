@@ -23,9 +23,9 @@ React는 Diffing Algorithm을 사용하여 2개의 Virtual DOM 트리를 비교�
 [React Fiber Deep Dive with Dan Abramov](https://www.youtube.com/watch?v=aS41Y_eyNrU)
 그는 2개의 Virtual DOM 트리을 사용하게 된 동기가 초기 게임 개발에 사용되었던 [Double Buffering Technique](https://namu.wiki/w/%EB%8D%94%EB%B8%94%20%EB%B2%84%ED%8D%BC%EB%A7%81)에서 유래했다고 설명했습니다.
 
-![Alt text](img1.daumcdn.png)
+![Alt text](./img1.daumcdn.png)
 
-![Alt text](1_RfdJzk2-YSVHsfnnteL5aw.webp)
+![Alt text](./1_RfdJzk2-YSVHsfnnteL5aw.webp)
 렌더링 이전 UI를 나타내는 VDOM을 **current**라고 부르겠습니다.
 
 렌더링 이후 UI를 나타내는 VDOM을 **work In Progress**라고 부르겠습니다
@@ -37,7 +37,7 @@ React는 Diffing Algorithm을 사용하여 2개의 Virtual DOM 트리를 비교�
 React에서 어떤 부분들이 변해야하는지 서로 다른 두 개의 트리를 비교하는 데 사용하는 알고리즘
 
 2개의 DOM 트리를 동기화 상태로 유지하는 프로세스로 **Reconciler** (조정자)와 **Renderer** (렌더러를) 사용하여 수행됩니다.
-![Alt text](image-1.png)
+![Alt text](./image-1.png)
 출처 https://velog.io/@jangws/React-Fiber
 - Reconciler는 비교 알고리즘을 사용하여 현재 트리와 진행 중인 작업 트리 간의 차이점을 찾고 계산된 변경 사항을 렌더러에 보냅니다
 
@@ -66,9 +66,9 @@ React에서 어떤 부분들이 변해야하는지 서로 다른 두 개의 트�
   ](https://immigration9.github.io/react/2021/05/29/react-fiber-architecture.html)
 
 ### Reconciliation Process
-![Alt text](1_1NXteRPEWnQAO7NzzQQGFQ.webp)
+![Alt text](./1_1NXteRPEWnQAO7NzzQQGFQ.webp)
 rendering/reconciliation 단계
-![Alt text](1_bkq3D0Dqyey2eRM9esq1hQ.webp)
+![Alt text](./1_bkq3D0Dqyey2eRM9esq1hQ.webp)
 current tree와 WIP tree의 포인터를 swap한 상태
 
 1. 상태가 변경되면 React는 브라우저 메인 스레드가 idle 상태가 될 때까지 기다린 다음 WIP(Work In Progress) 트리를 구축하기 시작
