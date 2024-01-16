@@ -227,16 +227,3 @@ npm create react-app hello-react
 ```bash
 npm create vite@latest
 ```
-
-# 정리
-
-## 면접 예상 질문
-
-- 리액트 사용 이유?
-    - Virtual DOM
-    - 컴포넌트 재사용성
-- Virtual DOM?
-    - Virtual DOM을 메모리에 생성해 이전 DOM과 비교해 필요한 부분만 업데이트 하도록 해 렌더링을 효율적으로 관리하도록 함
-- Vite?
-    - 프로젝트 빌드 도구
-    - ESM 방식을 이용해 실제로 필요한 모듈만을 동적으로 가져옴 고로 빠른 빌드 속도를 제공함
