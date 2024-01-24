@@ -1,3 +1,23 @@
+# 📝 면접질문
+
+### props와 state의 차이에 대해 설명해주세요.
+props와 state 모두 컴포넌트에서 사용하거나 렌더링할 데이터를 담고 있으므로 비슷해보일 수 있으나 다릅니다.
+props는 부모 컴포넌트에서 설정해주는 컴포넌트의 속성값으로 함수형 컴포넌트의 경우 인자값으로 전달됩니다.
+컴포넌트 자신은 읽기만 가능하여 직접 데이터 변경이 불가하며, 이를 변경하기 위해서는 최상위 부모 컴포넌트에서 
+변경하거나 추가로 state를 만들어주어야 합니다.
+
+state는 컴포넌트 자체적으로 지닌 값으로 내부에서 변경가능한 데이터입니다. 
+함수형 컴포넌트에서 useState를 사용하여 렌더링 사이에 데이터를 유지하면서, 업데이트가 이뤄질때 리렌더링을 합니다.
+state는 불변성을 유지해줘야 하여 클래스형 컴포넌트에서는 setState로, 함수형 컴포넌트에서는 useState로 변경해줄 수 있습니다.
+
+### state가 비동기적으로 동작하는 이유에 대해 설명하세요.
+
+이는 리렌더링과 관련있습니다. State 값이 변경되면 리액트가 이를 감지하고 VDOM과 비교하여 변경사항을 반영해줍니다.
+만약 state값이 변경될 때마다 리렌더링을 동기적으로 한다면 그때마다 리렌더링이 되고 이는 성능 저하로 이어집니다.
+따라서 세터함수는 state를 일괄 업데이트를 해줍니다.
+
+
+
 # 3장 컴포넌트
 ### 1. 클래스형 컴포넌트
 - 함수 컴포넌트와의 차이
@@ -6,8 +26,8 @@
   - 클래스형 컴포넌트 작성 시, 반드시  render함수 사용& 그 안에 보여줄 JSX를 반환
 
 - ES6의 화살표 함수
-  - function() : 일반 함수에서 this는 자신이 종속된 객체를 가르킨다.
-  - arrow function: 화살표 함수에서 this는 자신이 종속된 인스턴스를 가르킨다.
+  - function() : 일반 함수에서 this는 자신이 종속된 객체를 가르킨다. //동적 바인딩
+  - arrow function: 화살표 함수에서 this는 자신이 종속된 인스턴스를 가르킨다. //정적 바인딩
 
   ```js
   function BlackDog(){
@@ -37,8 +57,9 @@
   ```
 
 ### 2. props
-- 프로퍼티의 줄임말로 컴포넌트의 속성을 설정 
+- 프로퍼티의 줄임말로 **컴포넌트의 속성을 설정** 
 - 프로퍼티는 해당 컴포넌트를 불러와 사용하는 부모 컴포넌트에서 설정 가능 
+- ** 컴포넌트가 사용되는 과정에서 부모 컴포넌트에서 설정하는 값, 컴포넌트 자신은 읽기 전용 **
 - 프로퍼티 기본값: `defaultProps`를 사용해서 props를 지정하지 않을 때 보여줄 기본값 설정.
   ```js
   import React from 'react';
@@ -74,4 +95,44 @@
 - propTypes, defaultTypes는 함수형 컴포넌트와 동일한 방식
 
 ### 3. state
+- props와 달리 **컴포넌트 내부에서 바뀔 수 있는 값 **
+- 두 가지 state : 클래스형 컴포넌트에서 `state`, 함수형 컴포넌트에서 `useState`
+- ** 클래스형 컴포넌트에서 state **
+  ```js
+  import {Component} from 'react';
+  
+  class Counter extends Component{
+    constructor(props){
+      super(props);
+      //state의 초깃값 설정하기
+      this.state={
+        number:0
+      };
+    }
+    render(){
+      const {number} = this.state;
+      return (
+        <div>
+          <h1> {number} </h1>
+          <button onClick={()=>{this.setState({number:number+1})}}/>
+        </div>
+      )
+    }
+  }
+  ```
+  - constructor작성시 반드시 super(props) 호출해줘야 함.
+  - state는 객체 형식
+  - render 함수에서 state 조회시 this.state로 조회.
+  - state 값을 업데이트 할 때는 상태가 비동기적으로 업데이트 됨. => setState로 state 바로 업데이트 반영 ㄴㄴ
+  - 바로 업데이트 하고 싶다면 setState 사용시 객체 대신 **함수를** 인자로 넣어라
+    ```js
+      <button onClick{()=> this.setState(prevState=>{ number: prevState.number+1}, 
+      ()=>{console.log('값 업데이트 후 특정 작업 수행, 두번째 파라미터에 콜백함수등록')}
+      )}>
+    ```
+- ** 함수형 컴포넌트에서 state **
+  - useState Hooks를 사용한다.
+  - useState 호출시 배열 반환 -> 배열 비구조화 할당 -> [ 현재 상태, 세터함수 ]
+  - 반드시 state값 변경시 세터함수를 통해!!!
+  - 객체 사본을 만들 때는 spread 연산자 활용. 배열은 내장함수 활용 
 
