@@ -30,7 +30,7 @@ DOM의 성능을 개선하면서 최적의 UX 보장하기 위해 DOM을 추상�
   - 컴포넌트를 실제 페이지에 렌더링할 때, 문자열 HTML 코드 생성 $\rightarrow$ 특정 DOM에 내용 주입
 
 4. 조화 과정(reconciliation), 뷰 업데이트
-- 새로운 데이터를 가지고 `render()`호출  $\rightarrow$ 이전 `render()`가 만든 컴포넌트 정보와 비교  $\rightarrow$ 뷰를 최소환의 연산 후, 차이를 DOM 트리에 업데이트 
+- 새로운 데이터를 가지고 `render()`호출  $\rightarrow$ 이전 `render()`가 만든 컴포넌트 정보와 비교  $\rightarrow$ 뷰를 최소한의 연산 후, 차이를 DOM 트리에 업데이트 
 - 이 방식은 루트 노드에서 시작해 전체 컴포넌트를 처음부터 다시 렌더링하는 것처럼 보이지만, 사실 최적의 자원을 사용해 수행.
 
 ### 1.2 리액트 특징
@@ -40,7 +40,7 @@ DOM의 성능을 개선하면서 최적의 UX 보장하기 위해 DOM을 추상�
   - 동적 UI에 취약하다. HTML 자체는 정적이기 때문
   - DOM 자체는 빠르나 DOM에 변화가 일어날 때 시간이 많이 든다
     - CSSOM 그리기  $\rightarrow$ 레이아웃 구성  $\rightarrow$ 리페인트
-  - 따라서 DOM을 추상화한 Virtual DOM M을 이용해 DOM 처리 횟수를 최소화 한다.
+  - 따라서 DOM을 추상화한 Virtual DOM 을 이용해 DOM 처리 횟수를 최소화 한다.
 2. 리액트에서 DOM을 업데이트할 때 절차
   - 데이터를 업데이트하면 전체 UI를 Virtual DOM에 리렌더링
   - 이전 Virtual DOM에 있던 내용과 현재 내용을 비교
