@@ -599,6 +599,7 @@ export default App;
 ## **state를 사용할 때 주의 사항**
 
 - 배열이나 객체를 업데이트 할 때는 객체 사본을 만들고 그 사본에 값을 업데이트한 후, 그 사본의 상태를 setState 혹은 세터 함수를 통해 업데이트 합니다.
+
   ```jsx
    // 사본을 만들어서 업데이트하는 예시
 
@@ -758,90 +759,3 @@ class MyButton extends React.Component {
 함수 컴포넌트에서의 이벤트 처리는 다음과 같다.
 
 함수 컴포넌트 내에서 이벤트 핸들러 함수를 정의하는 방법은 함수 또는 화살표 함수가 있다. 이러헤 정의한 함수를 곧바로 이벤트 핸들러에 넣어주면 된다.
-
-```jsx
-function Toggle(props) {
-	const [isToggleOn, setIsToggleOn] = useState(true);
-
-	// 방법 1. 함수 안에 함수로 정의
-	function handleClick() {
-		setIsToggleOn((isToggleOn) => !isToggleOn);
-	｝
-
-	// 방법 2. 화살표 함수를 사용하여 정의
-	const handleClick = () = {
-		setIsToggleOn((isToggleOn) => !isToggleOn);
-	｝
-
-	return (
-		<button onClick={handleClick}>
-			{isToggleon ? "켜짐" : "꺼짐"}
-		</button>
-	);
-}
-```
-
-# **여러 개의 input 상태를 관리하기**
-
-```jsx
-import React, {useState}from 'react';
-
-functionEventPractice () {
-const [inputs, setInputs] = useState({
-        name : '',
-        nickname: ''
-    });
-
-const {name, nickname} = inputs;
-
-const onChange = (e) =>{
-const {value, name} = e.target;
-        setInputs({
-            ...inputs,
-            [name] : value
-        });
-    };
-
-const onReset = () =>{
-        setInputs({
-            name : '',
-            nickname: '',
-        })
-    }
-return (
-        <div>
-            <h1>이벤트 연습</h1>
-            <input  name = "name" placeholder="이름" onChange = {onChange}value = {name}></input><br />
-            <input  name = "nickname" placeholder="닉네임" onChange = {onChange}value = {nickname}></input><br />
-            <button onClick = {onReset}>초기화</button>
-            <div>
-                <b>값 :</b>
-                {name} ({nickname})
-            </div>
-        </div>
-    )
-}
-
-exportdefault EventPractice
-```
-
-input의 개수가 여러 개 있을 때는 input에 name을 설정하고 이벤트가 발생했을 때 값을 참조하는 것이다.
-
-useState에서는 문자열이 아닌 객체 형태의 상태를 관리.
-
-리액트에서 객체 형태의 상태를 수정할 때는 새로운 객체를 만들어서 새로운 객체에 변화를 주고
-
-이것을 상태에 사용해야 한다.
-
-```jsx
-setInputs({
-  ...inputs,
-  [name]: value,
-});
-```
-
-... 문법은 객체의 내용을 모두 펼쳐 기존 객체를 복사.
-
-이런 작업을 "불변성을 지킨다" 고 한다. 불변성을 지켜줘야 컴포넌트에서 상태가 업데이트 됐음을 감지하고
-
-필요한 리렌더링이 진행이 된다. 그리고 컴포넌트 업데이트 성능 최적화를 제대로 할 수 있게 된다.
