@@ -16,6 +16,13 @@ state는 불변성을 유지해줘야 하여 클래스형 컴포넌트에서는 
 만약 state값이 변경될 때마다 리렌더링을 동기적으로 한다면 그때마다 리렌더링이 되고 이는 성능 저하로 이어집니다.
 따라서 세터함수는 state를 일괄 업데이트를 해줍니다.
 
+### 클로저에 대한 개념을 설명하고, 어떻게 활용할 수 있는지 설명하세요.
+클로저는 함수와 그 함수가 선언된 렉시컬 환경의 조합입니다. 
+함수가 속한 렉시컬 환경을 기억하여, 렉시컬 스코프 밖에서 함수가
+실행되더라도 그 스코프에 접근할 수 있도록 해줍니다.
+
+이는 자바스크립트에 없는 '캡슐화'라는 개념을 구현할 수 있도록 해줍니다. 
+또한 데이터베이스 인스턴스 생성 및 상태관리에 정보은닉의 이점을 이용할 수 있습니다.
 
 
 # 3장 컴포넌트
@@ -136,3 +143,70 @@ state는 불변성을 유지해줘야 하여 클래스형 컴포넌트에서는 
   - 반드시 state값 변경시 세터함수를 통해!!!
   - 객체 사본을 만들 때는 spread 연산자 활용. 배열은 내장함수 활용 
 
+# 렉시컬스코프와 클로저
+### Javascript 클로저 개념
+  : 자바스크립트의 클로저는 함수와 함수가 선언된 렉시컬 환경과의 조합이다. 클로저는 함수가 생성될 때 그 범위에서 사용할 수 있는 모든 변수에 접근할 수 있게 해준다. 
+    
+### 1. 렉시컬 스코핑 (스코프: 변수나 함수가 유효할 수 있는 범위)
+  - 렉시컬은 "코드를 작성하는 시점" 과 관련이 있다. JS는 렉시컬 스코핑을 사용하는 언어다. 즉, 함수의 실행 컨텍스트가 아니라, 함수가 실제로 작성된 위치에 따라 변수의 범위가 결정된다.
+    
+    ```js
+    function outerFunction() {
+      var outerVar = 'I am outside!';
+
+      function innerFunction() {
+          console.log(outerVar); // 'I am outside!' outerFunction 범위에 정의되어 outerVar에 접근 가능하다.
+      }
+
+      return innerFunction
+      }
+	  ```
+
+### 2. 동적 스코핑
+- 렉시컬 스코프(정적스코프)와 다르게 함수를 어디서 호출했는지에 따라 상위 스코프가 결정됨.
+    
+### 3. 클로저
+-  함수와 그 함수가 선언된 렉시컬 환경의 조합. 함수 생성될 때, 그 함수는 주변 상태를 '기억'함. 다른 말로, 함수가 속한 렉시컬 스코프를 기억하여, 함수가 렉시컬 스코프 밖에서 실행되어도 이 스코프에 접근 가능할 수 있게 하는 기능.
+    
+  ```js
+
+	function outerFunction(){
+    const outerVar= "I'm outside!"
+      
+    function innerFunction(){
+      console.log(outerVar);
+      }
+      return innerFunction;
+    }
+	  var myFunction = outerFunction();
+	  myFunction(); // 'I am outside!'
+	```
+
+- myFunction은 outerFunction을 호출함으로써 반환된 `innerFunction` 이다. 
+- outerFunction이 실행을 마치고 반환된 후에도 `innerFunction`은  outerFunction의 변수 outerVar에 접근이 가능하다.
+    
+### 4. 클로저의 활용
+  - 데이터 캡슐화, 상태 보존, 프라이빗 변수와 같은 패턴 구현에 유용
+    ```js
+          function createCounter() {
+      let count = 0;
+      return {
+          increase: function() {
+              count++;
+          },
+          getCount: function() {
+              return count;
+            }
+        };
+    }
+	console.log(count) //불가
+    var counter = createCounter();
+    counter.increase();
+    counter.increase();
+    console.log(counter.getCount());
+	```
+    - createCounter 함수는 객체를 반환하고, 이 객체는 increase와 getCount 두 개의 메서드를 가지고 있다. `count`변수는 `createCouter`의 렉시컬 환경에 속하여 외부에서 직접 접근이 불가하다. 그러나 `increase`와 `getCount` 함수는 클로저를 통해 `count`변수에 접근이 가능하다.
+    
+    - 예) 데이터베이스 인스턴스 생성 및 상태 관리
+    - 주의 : 실수로 클로저로 생성된 함수는 꼭 nullify 필수 ! 그렇지 않으면 Memory Leak 이 발생
+    
