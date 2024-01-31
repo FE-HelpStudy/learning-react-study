@@ -71,7 +71,10 @@ const node = this.myRef.current;
 
 ### 컴포넌트에 ref 달기
 
+이미지 출처 : https://react.vlpt.us/basic/25-lifecycle.html
+
 ![untitled](image.png)
+
 컴포넌트 마운트 시 ⇒ React는 `current` 프로퍼티(ref 에 전달되는 값) 에 DOM 엘리먼트를 대입\*\*\*\*
 
 \*current 프로퍼티를 통해 해당 dom 엘리먼트에 접근가능
