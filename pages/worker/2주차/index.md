@@ -2,7 +2,6 @@
 
 ## 컴포넌트의 정의
 ![Alt text](./image/UI-Tree-768x273.png)
-![Alt text](./image/pureFC.jpg)
 UI building blocks
 
 컴포넌트는 html CSS 및 JS가 결합된 웹 앱의 독립적으로 재사용 가능한 UI 요소를 의미
@@ -22,6 +21,9 @@ https://medium.com/@developInvestor/composition-pattern-%EC%9D%84-react-componen
 ## 리액트가 클래스형 컴포넌트 대신 함수형 컴포넌트를 권장하는 이유
 
 ### TLDR
+함수형 컴포넌트는 렌더링이 일어날 때 그 순간의 props와 state 값을 기준으로 렌더링 된다.
+클래스형 컴포넌트는 mutable한 값인 this를 기준으로 렌더링이 된다
+
 1. 리랜더링 될 때 immutable한 값을 유지한다.
 2. 함수형 컴포넌트는 props에 따른 랜더링 결과를 보장받는다.
 (immutable한 props를 받기 때문에 결국엔 랜더링 결과가 보장된다)
@@ -43,7 +45,7 @@ https://medium.com/@developInvestor/composition-pattern-%EC%9D%84-react-componen
 
 ### 리액트의 아버지 리버지 dan abramov의 설명
 
-```함수형 컴포넌트는 render된 값(props,state)들을 캡쳐한다.```
+```함수형 컴포넌트는 렌더링이 일어날 때마다 그 순간의 값인 props와 state를 기준으로 렌더링 된다.```
 
 #### [How Are Function Components Different from Classes?](https://overreacted.io/how-are-function-components-different-from-classes/) - Dan Abramov ([번역](https://ideveloper2.dev/blog/2019-03-12--how-are-function-components-different-from-classes/))
 

@@ -32,7 +32,7 @@ React는 Diffing Algorithm을 사용하여 2개의 Virtual DOM 트리를 비교�
 
 리액트는 리랜더링이 발생하면 어떤 부분을 새롭게 렌더링해야 하는 지 실제 DOM과 VDOM을 비교하는 재조정(reconciliation)과정을 통해 실제 DOM과 VDOM을 동기화 합니다.
 
-### Reconciliation (조정)
+### Reconciliation (재조정)
 
 React에서 어떤 부분들이 변해야하는지 서로 다른 두 개의 트리를 비교하는 데 사용하는 알고리즘
 
