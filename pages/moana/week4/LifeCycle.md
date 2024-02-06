@@ -18,6 +18,7 @@
   <br/>
 
   <img src="./리액트라이프사이클.png"/>
+  [출처] https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/
 
 - 마운트
   - `constructor`: 컴포넌트를 새로 만들 때마다 호출되는 클래스 생성자 메서드
@@ -63,6 +64,7 @@
 1. 리액트 컴포넌트의 라이프사이클 메서드에 따라 컴포넌트가 마운트, 업데이트, 언마운트 된다.
 2. **상태 및 속성 변경**: 사용자 상호작용  또는 API호출 등으로 컴포넌트의 상태나 속성 (state, props)이 변경될 경우, 리액트는 VDOM을 업데이트하고 실제 DOM과의 차이를 계산한다.
 3. **DOM 업데이트**: 리액트는 계산된 차이를 바탕으로 실제 DOM을 최소한으로 조작해 변경사항을 반영한다.
+  - DOM의 update를 Batch로 처리하여 실제 DOM의 리렌더링 연산을 최소화할 수 있다. 연쇄적인 Reflow, Repaint 발생을 줄인다.
 
 ### 3.브라우저의 렌더링
 1. **Reflow 최소화**: DOM의 변경(요소의 추가, 삭제, 크기 변경 등)이 발생하면, 브라우저는 화면에 영향을 미치는 요소의 위치와 크기를 다시 계산하는 Reflow를 한다. 초기 로드시, 리액트 컴포넌트가 DOM에 추가되는 순간 Reflow가 발생하며, 컴포넌트의 크기나 위치가 바뀌는 컴포넌트 업데이트가 일어날 때도 발생한다.
@@ -70,11 +72,50 @@
 2. **Repaint 최적화**: 요소의 스타일(색상, 배경 등)이 변경되면, 브라우저는 해당 요소를 다시 그리는 Repaint를 한다. Reflow 후에 일어날 수도 있고, Repaint만 일어날 수 있다.
 
 
-3. 추가 ++
+3. 추가 설명
 - Props나 State 변화, 부모 컴포넌트 리렌더링은 재렌더링을 유발한다. 이는 결과적으로 DOM에 변화를 주는데 리액트는 가상 DOM을 사용해 불필요한 DOM 조작을 최소화하기 때문에 Reflow를 최적화한다.
+
+  - Batch Update 예시
+  ```js
+   const list = document.getElementById('myList');
+    list.style.color = 'blue'; // (1) 스타일 변경
+    list.textContent = 'Updated list item'; // (2)텍스트 변경
+  ```
+  - 일반적인 브라우저 Update는 DOM 조작이 즉시 처리됨: (1),(2)가 각각 DOM 변경 별개 처리되기 때문에 Reflow, Repaint발생
+  ```js
+  function MyComponent() {
+    const [color, setColor] = useState('red');
+    const [text, setText] = useState('Initial text');
+
+    const updateComponent = () => {
+      setColor('blue'); // (1) 색상 변경
+      setText('Updated list item'); // (2) 텍스트 변경
+    };
+
+    return (
+      <div style={{ color }}>
+        {text}
+        <button onClick={updateComponent}>Update</button>
+      </div>
+    );
+  }
+  ```
+  - 리액트는 상태 변경들을 Batch Update처리함. 여러 상태 변경을 한 번에 모아 처리. 따라서 단 한번의 Reflow와 Repaint가 일어남.
+
 - 그럼에도 불구하고, 큰 리스트를 렌더링하거나, 복잡한 레이아웃을 가진 컴포넌트는 Reflow 성능에 영향을 미칠 수 있다. 
 
 - 이를 위해 `shouldComponentUpdate`, `React.memo`, `useMemo`등의 기법을 사용한다.
 - 예를 들어 전체 개시물을 보여주는 count state의 경우 텍스트 내용만 바꾸기 때문에 (= DOM 요소의 크기나 위치에 영향을 주지 않기 때문에) Reflow는 발생하지 않고 Repaint만 발생한다.
 - 예를 들어 `margin-top`같은 속성 변경이 발생하면, 리액트는  VDOM에서 차이를 계산하고, 레아웃에 영향으 주기 때문에 Reflow가 발생하며 이후 Repaint를 한다.
 - Reflow를 발생시키는 CSS 사용을 최소화하면 좋다. (CSS 속성마다 어떤 발생을 일으키는지 알려주는 사이트: https://www.lmame-geek.com/)
+- Layout과 Paint가 모두 발생하지 않는 속성: `transform, opacitiy, cursor, orphans, perspective`
+
+
+
+
+#### 참고
+>https://velog.io/@1nthek/React-Virtual-DOM%EA%B3%BC-%EB%A0%8C%EB%8D%94%EB%A7%81
+
+> 리액트 다루는 기술 7장
+
+> https://adjh54.tistory.com/42
