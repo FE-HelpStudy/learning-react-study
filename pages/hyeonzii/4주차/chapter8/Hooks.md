@@ -220,6 +220,17 @@ const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 
 함수 부분을 위와 같이 변경해주면 됩니다.
 
+> Q. useCallback 과 useEffect의 차이??
+>
+> A. **사용 목적**이 다릅니다.
+>
+> **useCallback**
+> 콜백함수를 자식에게 전달해줄 때 사용
+> 자주 렌더링 위험이 있는 요소를 성능 최적화하기 위해 사용
+> **useEffect**
+> 사이드 이펙트 방지를 위해 사용
+> API 통신, 이벤트 리스너 추가, DOM 업데이트 등
+
 ## useRef
 
 함수 컴포넌트에서 ref를 쉽게 사용할 수 있도록 해줍니다.
@@ -443,3 +454,4 @@ debouncedSearchTerm의 실행시간을 지연시킨 것을 확인할 수 있습�
 [우리 팀이 Zustand를 쓰는 이유](https://velog.io/@greencloud/%EC%9A%B0%EB%A6%AC-%ED%8C%80%EC%9D%B4-Zustand%EB%A5%BC-%EC%93%B0%EB%8A%94-%EC%9D%B4%EC%9C%A0)
 [[Hook] 커스텀 훅과 그 종류](https://velog.io/@chltjdrhd777/Hook-%EC%BB%A4%EC%8A%A4%ED%85%80-%ED%9B%85%EA%B3%BC-%EA%B7%B8-%EC%A2%85%EB%A5%98)
 [useHooks](https://usehooks.com/)
+[[React] useEffect와 useCallback 차이 간단 정리!](https://23log.tistory.com/192)
