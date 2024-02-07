@@ -18,7 +18,7 @@
   <br/>
 
   <img src="./리액트라이프사이클.png"/>
-  [출처] https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/
+  [출처] https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram//
 
 - 마운트
   - `constructor`: 컴포넌트를 새로 만들 때마다 호출되는 클래스 생성자 메서드
