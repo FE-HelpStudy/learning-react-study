@@ -27,7 +27,7 @@
 
 개인적으로 새로운 기술을 학습하고 싶은 경우 사용량과 관심도의 증감 추이와 만족도(retention) 를 가지고 학습 여부를 판단합니다.
 
-![alt text](image-2.png)
+![alt text](./image-2.png)
 
 ***"내가 학습한 기술이 새로운 기술에 따잇 당했네?"***
 
@@ -41,7 +41,7 @@ open props와 uno css가 tailwind css를 만족도 측면에서 유의미하게 
 
 CSS in JS는 style-component와 css module 둘 중 하나를 선택하는 것이 당연해보입니다.
 
-![alt text](image-3.png)
+![alt text](./image-3.png)
 
 ## 결론
 
@@ -65,7 +65,7 @@ W3C(월드와이드 컨소시엄, 특 CSS개발하고 추가하고 있음)에서
 
 선택자란 CSS로 UI 의 어느 부분을 디자인할지, 즉 표현할 대상이 되는 부분을 말합니다.
 
-![alt text](image-4.png)
+![alt text](./image-4.png)
 
 ## 선택자의 종류
 
