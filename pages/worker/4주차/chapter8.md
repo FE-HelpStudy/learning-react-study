@@ -155,7 +155,9 @@ function dispatchSetState<S, A>(
 
 ### 5. 업데이트를 한 번에 처리해주는 것이 렌더링이 한 번만 일어나는 것을 보장하나?
 
-<img src="./image/lifecycle_phase.png" alt="lifecycle_phase" style="height: 400px; width:800px;"/>
+<!-- <img src="./image/lifecycle_phase.png" alt="lifecycle_phase" style="height: 400px; width:800px;"/> -->
+
+![라이프사이클](./image/lifecycle_phase.png)
 
 세로축의 렌더 단계와 커밋 단계을 보면 batch 하게 렌더링을 처리하기 때문에 렌더링이 1번 발생한다
 또는 리렌더링시 재조정 단계에서 변경사항이 없다면 커밋 단계가 생략됩니다.
@@ -168,7 +170,9 @@ VDOM의 변경사항에 대해 업데이트하는 경우는 렌더링이 1번 �
 
 update 정보가 담긴 원형 연결 리스트를 순회하면서 state를 계산하고 마지막으로 계산된 state의 값을 리턴하여 화면에 렌더링한다
 
-<img src="./image/fiber_hook_queue.png" alt="fiber hook queue" style="height: 400px; width:800px;"/>
+<!-- <img src="./image/fiber_hook_queue.png" alt="fiber hook queue" style="height: 400px; width:800px;"/> -->
+
+![fiber 내의 hook queue](./image/fiber_hook_queue.png)
 
 ```typescript
 export type Hook = {
