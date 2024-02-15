@@ -236,7 +236,7 @@ p:nth-child(3) {color:blue;}
 P:before {content:"!"}
 P:after {content:"$"}
 ```
-![alt text](img1.daumcdn.png)
+![alt text](./img1.daumcdn.png)
 
 ## 선택자 우선순위
 
