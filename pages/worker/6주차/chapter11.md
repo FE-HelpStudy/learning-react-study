@@ -164,7 +164,7 @@ export default React.memo(TodoList)
 
 ## CSS content-visibility 속성을 사용한 렌더링 최적화
 
-![alt text](image/contentV.PNG)
+![alt text](./image/contentV.PNG)
 
 [mdn](https://developer.mozilla.org/en-US/docs/Web/CSS/content-visibility)
 
