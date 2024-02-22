@@ -112,23 +112,21 @@ react.memo는 props변화에만 영향을 줌. memo로 감싸진 함수에 useSt
 - but, React.memo()는 props 혹은 props의 객체를 비교할 때 얕은 비교를 통해 객체의 레퍼런스(메모리 주소)만을 비교함
 - 이러한 동작 방식으로 인해 복잡한 객체의 경우 객체의 내부 값이 변경되었음에도 레퍼런스가 변경되지 않으면 변경을 감지하지 못할 수 있음.
 - so, 다른 더 구체적인 비교동작을 원한다면 두번째 인자로 비교함수 제공해야함.
--
-
----
+- ***
 
 ### profiling을 통한 분석
 
-![1.png](./image/css.png)
+![1.png](./image/1.png)
 
-![22.png](./image/css.png)
+![22.png](./image/22.png)
 
-![33.png](./image/css.png)
+![33.png](./image/33.png)
 
-![44.png](./image/css.png)
+![44.png](./image/44.png)
 
-![55.png](./image/css.png)
+![55.png](./image/55.png)
 
-![66.png](./image/css.png)
+![66.png](./image/66.png)
 
 ### 주의!
 
@@ -237,13 +235,13 @@ export default function UseMemoEx() {
 
 위 코드에서 **`memoizedMovie`**는 **`useMemo`**를 사용하여 **`Movie`** 컴포넌트를 메모이제이션하고, 해당 컴포넌트를 **`MovieViewsRealtime2`** 컴포넌트에서 사용됨. 이렇게 하면 **`Movie`** 컴포넌트가 동일한 **`title`**과 **`releaseDate`** props를 가질 때 이전에 계산한 값을 재사용하게 됨.
 
-![77.png](./image/css.png)
+![77.png](./image/77.png)
 
-![88.png](./image/css.png)
+![88.png](./image/88.png)
 
-![99.png](./image/css.png)
+![99.png](./image/99.png)
 
-![100.png](./image/css.png)
+![100.png](./image/100.png)
 
 # Usecallback
 
@@ -299,9 +297,9 @@ export default function ParentComponent() {
 }
 ```
 
-![111.png](./image/css.png)
+![111.png](./image/111.png)
 
-![122.png](./image/css.png)
+![122.png](./image/122.png)
 
 ```jsx
 'use client';
@@ -336,9 +334,9 @@ export default function ParentComponent() {
 }
 ```
 
-![133.png](./image/css.png)
+![133.png](./image/133.png)
 
-![144.png](./image/css.png)
+![144.png](./image/144.png)
 
 ### 요약
 
