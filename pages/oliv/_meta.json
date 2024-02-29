@@ -4,5 +4,6 @@
   "chapter3": "chapter3. 컴포넌트",
   "chapter4": "chapter4. 이벤트 핸들링",
   "chapter6": "chapter6. 컴포넌트 반복",
-  "chapter8": "chapter8. 컴포넌트 스타일링"
+  "chapter8": "chapter8. 컴포넌트 스타일링",
+  "chapter13": "chapter13. 리액트 라우터"
 }
