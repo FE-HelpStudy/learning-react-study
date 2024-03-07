@@ -58,6 +58,7 @@
   resolved "https://registry.npmjs.org/@napi-rs/simple-git-darwin-arm64/-/simple-git-darwin-arm64-0.1.9.tgz"
   integrity sha512-H/F09nDgYjv4gcFrZBgdTKkZEepqt0KLYcCJuUADuxkKupmjLdecMhypXLk13AzvLW4UQI7NlLTLDXUFLyr2BA==
 
+
 "@napi-rs/simple-git@^0.1.9":
   version "0.1.9"
   resolved "https://registry.npmjs.org/@napi-rs/simple-git/-/simple-git-0.1.9.tgz"
@@ -84,6 +85,7 @@
   version "14.0.4"
   resolved "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-14.0.4.tgz"
   integrity sha512-mF05E/5uPthWzyYDyptcwHptucf/jj09i2SXBPwNzbgBNc+XnwzrL0U6BmPjQeOL+FiB+iG1gwBeq7mlDjSRPg==
+
 
 "@popperjs/core@^2.11.6":
   version "2.11.8"
