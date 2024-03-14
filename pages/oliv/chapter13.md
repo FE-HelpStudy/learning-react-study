@@ -2,7 +2,7 @@
 
 React는 CRS기반의 SPA
 
-## Deep Dive - SPA, MPA, CRS, SSR
+## Deep Dive - SPA, MPA, CSR, SSR
 
 ###
 
