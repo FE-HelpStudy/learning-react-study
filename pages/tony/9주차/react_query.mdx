@@ -1,0 +1,301 @@
+최근 진행중인 프로젝트인 코테PT는 취업 준비생을 위한 코딩테스트 학습, 복습 일정 관리를 제공하는 서비스다.
+
+사용자가 코테PT에서 백준 ID를 입력하면 백준에서 해당 ID로 푼 문제들의 정보만 크롤링하는데, 해당 페이지가 페이지네이션으로 되어있어서 다음 페이지가 존재하지 않을 때까지 크롤링해서 가져오게 된다.
+
+만약 사용자가 푼 문제가 많을 경우 크롤링해서 가져오는 데이터의 양도 많아지므로 시간이 오래걸리게 된다.
+
+같은 ID를 여러번 조회하게 될 경우 사용자는 매 번 오랜 시간동안 기다려야 하는 UX에 좋지 않은 영향을 준다.
+
+따라서 한 번 크롤링한 데이터는 최대한 캐싱해주면 초기 데이터 조회는 오래 걸릴지라도 그 이후 다시 조회할 때는 캐싱한 데이터를 제공하기 때문에 UX 향상을 기대할 수 있다.
+
+이처럼 서버 상태 관리 라이브러리 중 캐싱 기능을 제공해주는 React-Query를 도입하게 됐다.
+
+# React Query? TanStack Query?
+이전에는 React Query로 불렀지만, 이제 React만 지원하는 서버 상태 관리 라이브러리가 아니기 때문에 TanStack Query로 이름을 변경했다. 하지만 사람들은 React Query로 부르기 때문에 여기서도 그냥 그대로 부르겠다.
+
+React Query는 클라이언트에서 서버에 데이터를 가져오기 위해 요청하는(fetching) 라이브러리지만, 이 뿐 아니라 기술적으로 캐싱, 서버 상태 동기화 및 업데이트를 쉽게 할 수 있다.
+
+> 서버 상태는 다음과 같이 정의된다.
+- 사용자가 제어 및 소유하지 않는 위치(ex - 데이터 베이스)에서 관리된다.
+- fetching이나 updating에는 비동기 API 요청이 필요하다.
+- 서버 상태는 공유되며 다른 사람이 사용자 모르게 변경할 수 있다.
+- 잠재적으로 서버 상태는 `오래된` 상태가 될 수 있기에 주의해야한다.
+
+이러한 서버 상태를 애플리케이션에서 직접 관리하려면 어려운 과정이고, React Query는 서버 상태 관리를 위한 최적의 라이브러리다.
+
+React Query를 사용하면 다음과 같은 문제를 해결할 수 있다.
+- 캐싱 지원
+- 동일한 데이터에 대한 여러 요청을 단일 요청으로 처리
+- 백그라운드에서 `오래된` 데이터 상태 업데이트
+- 데이터의 상태가 `오래된` 상태로 변경되는 시기 파악
+- 페이지 네이션, 데이터 지연 로딩과 같은 성능 최적화
+- 서버 상태의 메모리 및 가비지 컬렉션 관리
+- 쿼리 결과 메모화
+
+## 데이터의 라이프 사이클
+React Query에서 사용되는 데이터 상태 키워드가 있다.
+
+1. fetching
+- 데이터를 요청해서 불러오는 중인 상태
+- 즉, 서버에 API 요청을 날리고 응답을 기다리고 있는 상태
+2. fresh
+- 데이터가 신선한 상태(캐싱된 데이터)
+- 즉, staleTime이 지나지 않은 데이터로써 fresh한 데이터를 다시 요청하면, 실제로 요청하지 않고 해당 데이터를 반환
+3. stale
+- 데이터가 상한 상태(캐싱되지 않은 데이터)
+- 즉, stale이 지난 데이터로써 stale한 데이터를 다시 요청하면, 서버에 다시 API 요청
+4. active
+- 쿼리가 실행된 컴포넌트가 현재 mount된 상태이고, 불러온 데이터가 해당 컴포넌트에 active된 상태
+- 즉, mount된 컴포넌트에서 쿼리로 가져온 데이터를 사용하는 중
+5. inactive
+- 쿼리가 실행된 컴포넌트가 unmount된 상태이고, 해당 컴포넌트에서 불러온 데이터는 inactive된 상태
+- 즉, 현재 사용되고 있지는 않지만 메모리에 캐싱되어 남아있는 상태
+6. delete
+- gcTime이 지나면 가비지 컬렉터에 의해 inactive한 데이터는 메모리에서 제거된다.
+
+> staleTime과 gcTime
+- staleTime은 캐싱이 유지되는 시간을 의미
+만약 staleTime이 5분이면 0 ~ 5분까지는 캐싱되고, 5분이 지나면 해당 데이터는 `상한` 상태가 된다.
+- gcTime은 가비지 컬렉터가 실행되기 전 시간을 의미
+gcTime은 항상 staleTime보다 커야한다. 그 이유는 staleTime보다 작게 설정되면 캐싱중인 데이터가 있는데 gcTime이 지나 가비지 컬렉터가 동작하면 안되기 때문이다.
+>
+> 또한 가비지 컬렉터가 존재하는 이유는 staleTime이 지나 `상한` 데이터들이 지워지지 않고 메모리에 쌓여 메모리 용량이 커지는 것을 방지하기 위해 gcTime은 필요하다.
+>
+> 만약 staleTime을 0으로 설정하면 fetch하자마자 데이터는 `상한` 데이터로 변하게 된다.
+> 
+> 따라서 상황에 맞게 staleTime과 gcTime을 알맞게 설정해주는 것이 중요하다.
+
+## 사용방법
+### 라이브러리 설치
+아래 스크립트로 설치하면 최신 버전인 React Query v5가 설치된다.
+```bash
+npm i @tanstack/react-query
+```
+개발 환경에서 디버깅에 도움이 되는 React Query Devtools도 같이 설치한다.
+```bash
+npm i @tanstack/react-query-devtools
+```
+
+### 초기 설정
+```jsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retryOnMount: true,
+      refetchOnReconnect: false,
+      retry: false,
+      staleTime: 60 * 1000 * 5,
+    },
+  },
+});
+
+
+function App() {
+  return (
+    // Provide the client to your App
+    <QueryClientProvider client={queryClient}>
+      <ProfilePage />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+```
+QueryClientProvider를 통해 client를 제공함으로써 QueryClient 인스턴스로 캐시와 상호작용할 수 있다.
+
+## Queries
+쿼리는 고유 키에 연결된 비동기 데이터 소스에 대한 선언적 종속성으로 서버에서 데이터를 가져오기 위한 모든 프로미스 기반 메서드와 함께 사용할 수 있다.
+
+### [useQuery](https://tanstack.com/query/latest/docs/framework/react/reference/useQuery)
+```jsx
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+
+const ProfileCard = () => {
+  const params = useParams();
+  const baekjoonQuery = useQuery({queryKey: ['solved', params.id], queryFn: async () => await fetchBaekjoon(params.id)});                  
+}
+```
+useQuery를 사용할 때는 queryKey와 queryFn이 필요하며, queryKey에 할당된 캐시 데이터가 없다면 queryFn가 실행되면서 받아온 데이터를 queryKey에 캐싱한다.
+
+queryKey는 배열 형식으로 지정해줘야하며 `['solved', params.id, {state, page}]`, `['solved', params.id]`, `[params.id, 'solved']` 다 다른 queryKey를 의미한다. 배열 값으로 숫자, 문자, 직렬화된 객체가 올 수 있으며 배열의 순서가 중요하다.
+
+또한 queryFn에 전달되는 인자가 queryKey에 동일한 값으로 사용되고 있다면 다음처럼 수정할 수 있다.
+```jsx
+  const baekjoonQuery = useQuery({queryKey: ['solved', params.id], queryFn: async ({ queryKey }) => await fetchBaekjoon(queryKey[1])});
+```
+queryFn은 Promise를 반환해야한다.
+
+만약 queryKey와 queryFn을 여러 곳에서 동일하게 사용한다면 queryOptions를 사용해서 한 곳에서 정의한 뒤 재사용할 수 있다.
+```jsx
+import { queryOptions } from '@tanstack/react-query'
+
+const baekjoonSolvedOptions = ( baekjoonId: number ) => {
+  return queryOptions({
+    queryKey: ['solved', baekjoonId],
+    queryFn: async () => await fetchBaekjoon(baekjoonId),
+    // options
+    staleTime: 5 * 1000, // 캐싱 시간 5초로 설정
+    // enabled: !!baekjoonId, // baekjoonId가 존재하지 않으면 쿼리 동작하지 않음
+  })
+}
+
+// Example
+useQuery(baekjoonSolvedOptions(params.id));
+useQueries({
+  queries: [baekjoonSolvedOptions(params.id), baekjoonSolvedOptions(params.id)],
+});
+useSuspenseQuery(baekjoonSolvedOptions(params.id));
+queryClient.prefetchQuery(baekjoonSolvedOptions(params.id));
+queryClient.setQueryData(baekjoonSolvedOptions(params.id).queryKey, newData);
+```
+
+### [useQueries](https://tanstack.com/query/latest/docs/framework/react/reference/useQueries)
+useQueries는 하나의 컴포넌트에서 여러개의 쿼리 요청을 보낼 때 사용하면 데이터 fetch 요청을 동시에 처리할 수 있다.
+
+useQueries를 사용하지 않고 수동적으로 여러개의 쿼리 요청을 보낼 수 있다.(단, 쿼리의 개수가 정해져 있을 때)
+```jsx
+function App () {
+  // 다음 쿼리는 병렬적으로 수행된다.
+  const usersQuery = useQuery({ queryKey: ['user', 1], queryFn: fetchUser })
+  const teamsQuery = useQuery({ queryKey: ['user', 2], queryFn: fetchUser })
+  const projectsQuery = useQuery({ queryKey: ['user', 3], queryFn: fetchUser })
+  ...
+  
+  // useQueries를 통한 병렬적으로 처리
+  const users = [{id: 1}, {id: 2}, {id: 3}];
+  const userCombinedQueries = useQueries({
+    queries: users.map((user) => {
+      return {
+        queryKey: ['user', user.id],
+        queryFn: () => fetchUser(user.id),
+        // options
+      }
+    }),
+    combine: (results) => {
+      return {
+        data: results.map((result) => result.data),
+        pending: results.some((result) => result.isPending),
+      },
+    },
+  })
+}
+```
+만약 users 배열의 길이가 고정적이지 않다면 useQueries를 사용해서 해결할 수 있다. useQueries의 반환 값을 모든 쿼리 결과가 포함된 배열을 반환하며, 반환된 순서는 입력(쿼리 요청) 순서와 동일하다.
+
+실행되는 여러 query들의 결과를 하나로 합치거나, pending과 같이 `some`메서드를 이용해 쿼리 요청 중 하나라도 pending 상태라면 true를 반환하는 **combine** 기능을 사용하면 된다.
+
+### [useSuspenseQuery](https://tanstack.com/query/latest/docs/framework/react/reference/useSuspenseQuery)
+React Query에서 React Suspense와 함께 사용할 수 있도록 useSuspenseQuery를 제공한다.
+
+이전에 포스팅했던 [React 18 Suspense 이해하고 사용하자](https://velog.io/@taemin-jang/React-18-Suspense-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B3%A0-%EC%82%AC%EC%9A%A9%ED%95%98%EC%9E%90#axios--custom-hook)에서 fetch나 axios를 사용하면서 Suspense 적용하려면 추가로 설정해줘야하는 부분이 있었다.
+
+하지만 React Query에서 제공하는 useSuspenseQuery를 사용하면 Suspense가 이를 인지해 데이터 요청중이면 fallback UI를 보여주고 요청이 완료되면 반환된 데이터로 리렌더링한다.
+```jsx
+import { useSuspenseQuery } from '@tanstack/react-query';
+
+const { data } = useSuspenseQuery({ queryKey, queryFn });
+```
+공식문서에서 추천하는 방식은 Render-as-you-fetch 방식으로 useSuspenseQuery가 마운트되기 전에 라우팅 콜백이나 사용자 이벤트 콜백에 prefetching으로 미리 요청하는 것이다.
+```jsx
+// SearchBar 컴포넌트
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+
+const SearchBar = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
+  const handleClick = (baekjoonId) => {
+   	 queryClient.prefetchQuery({
+       queryKey: ['solved', baekjoonId],
+       queryFn: () => fetchAchievement(baekjoonId),
+     });
+     navigate(`/profile/${baekjoonId}`);
+  }
+}
+
+// ProfileCard 컴포넌트
+const ProfileCard = ({ params }) => {
+  const { data: baekjoonData } = useSuspenseQuery({
+     queryKey: ['solved', params.id],
+     queryFn: async () =>
+       await fetchBaekjoon(params.id),
+  });
+}
+
+// Profile 컴포넌트
+const Profile = () => {
+  ...
+  return(
+    ...
+    <Suspense fallback={<ActivityLoading />}>
+      <ProfileCard params={params} />
+    </Suspense>
+    ...
+  )
+}
+```
+prefetchQuery는 staleTime보다 오래된 경우에만 queryFn이 실행 및 비동기로 동작하며 promise를 반환하지 않는다.
+
+위 코드는 SearchBar 컴포넌트에서 baekjoonId를 입력하고 조회하는 버튼을 클릭했을 때 prefetchQuery를 통해 비동기로 데이터 요청을 날리고 profileCard 컴포넌트에서 useSuspenseQuery에서 동일한 queryKey를 조회하면 prefetchQuery에서 날린 요청으로 인해 Suspense가 동작하게 된다.
+
+## Mutation
+쿼리와 달리 Mutation은 데이터를 생성, 수정, 삭제하거나 서버 사이드 이펙트를 수행하는데 사용된다.
+
+### [useMutation](https://tanstack.com/query/latest/docs/framework/react/reference/useMutation)
+```jsx
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+const ProfileCard = () => {
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: async baekjoonId => await fetchAchievement(baekjoonId),
+    mutationKey: ['update', 'crawling', params.id],
+  });
+  
+  ...
+  
+  return(
+  	...
+    <LoadingButton
+      isPending={isPending}
+      onClick={e =>
+        mutate(params.id, {
+          onSuccess: async res => {
+            const crawlingData = res.data[0];
+            queryClient.setQueryData(
+              ['solved', params.id],
+              crawlingData,
+            );
+          },
+          onSettled: () => queryClient.invalidateQueries({ queryKey: ['solved', params.id] }),
+        })
+      }
+    >
+      <Refresh />
+    </LoadingButton>
+  )
+}
+
+// 동일한 mutationKey 값을 사용하는 다른 컴포넌트에서 useIsMutating을 통해 낙관적 업데이트가 가능하다.
+const isMutatingCrawling = useIsMutating({
+  mutationKey: ['update', 'crawling', params.id],
+});
+```
+useMutation에서 mutate와 isPending을 객체 구조 분해할당으로 받았다. mutate는 mutationFn 함수를 실행시키는 Trigger 역할이고, 데이터 요청하는 동안 isPending의 값은 true다.
+
+useMutation의 핵심은 `Optimistic Updates(낙관적 업데이트)`다.
+> Optimistic Updates란?
+> Post 요청과 같은 서버 상태를 변경시키는 요청을 실행하면 화면에는 변경된 값이 바로 반영되고 백그라운드에서는 서버 업데이트하는 것이다.
+
+위 코드는 새로운 크롤링 데이터를 성공적으로 받아오면 onSuccess 안에 setQueryData로 인해 캐시를 업데이트한다.
+
+그리고 onSettled는 에러가 나든 성공을 하든 무조건 실행되는 곳으로 invalidateQueries를 사용하면, 기존 queryKey로 가져온 데이터를 다시 요청하고 낙관적 업데이트한 데이터로 화면에 반영시킬 수 있다.
+
+### 참고
+- [TanStack Query v5 공식 문서](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults)
