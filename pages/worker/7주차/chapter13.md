@@ -989,6 +989,7 @@ Next.js는 Zusstand를 적절하게 사용하는 데 있어 몇 가지 unique ch
 ### **No global stores**
 
 - store는 요청 간에 공유되어서는 안 되기 때문에 전역 변수로 정의되어서는 안 됩니다. 
+  => provider와 call by reference로 참조해라
 
 - 대신 요청에 따라 store를 생성해야 합니다.
 
@@ -997,6 +998,9 @@ Next.js는 Zusstand를 적절하게 사용하는 데 있어 몇 가지 unique ch
 - RSC는 hook과 context를 사용할 수 없습니다. state 저장을 위한 것이 아닙니다.
 
 - RSC가 전역 store에서 값을 읽거나 쓰는 것은 Next.js의 아키텍처를 위반합니다.
+
+### Note: creating a store per route would require creating and sharing the store at page (route) component level. **`Try not to use this`** if you do not need to create a store per route.
+- 라우트마다 스토어를 생성하는 것은 페이지(라우트) 컴포넌트 수준에서 스토어를 생성하고 공유해야 한다는 것을 의미합니다. 라우트마다 스토어를 생성할 필요가 없다면, 이 방법을 사용하지 않는 것이 좋습니다.
 
 ## 각 요청에 대해 새 스토어를 생성하는 스토어 팩토리 함수
 
