@@ -1,0 +1,200 @@
+# 번들링
+웹 개발에서 `번들링은 빌드`라고 할 수 있다.
+
+번들링은 HTML, CSS, JS와 같이 각각의 모듈들을 하나의 묶음으로 만드는 작업을 의미한다.
+
+즉, 모듈 간의 의존성 관계를 파악해 그룹화시켜주는 작업이다.
+
+번들링을 하는 이유 중 하나는 파일 크기 문제를 해결하기 위해서로써, 번들링된 파일은 원본 파일보다 크기가 작아져 파일 실행 속도와 로딩 속도가 빨라진다.
+
+# Code Splitting
+애플리케이션의 규모가 커지면 번들링을 하더라도 번들 사이즈도 커지게 된다. 특히 큰 규모의 서드 파티 라이브러리를 추가하고 앱이 커져 번들된 파일도 커지게 될 때 해결할 수 있는 방안이 코드 스플리팅이다.
+
+코드 스플리팅을 하면 초기에 필요하지 않은 컴포넌트 정보들을 불러오지 않고 필요한 시점에서 불러와 로딩 속도를 향상시킬 수 있다.
+
+코드 스플리팅을 적용하는 다양한 방법에 대해 알아보자.
+
+## import()
+코드 스플리팅을 적용시키는 방법으로 dynamic import() 문법을 사용하는 것이다.
+
+dynamic import()를 사용하면 애플리케이션에 필요한 모듈을 필요한 시점에 로드할 수 있어 초기 로딩 속도를 향상시키고, 필요하지 않은 모듈의 로드를 지연시킬 수 있다.
+
+dynamic import()는 모듈을 읽고 해당 모듈이 export하는 것들을 객체로 담아 fulfilled Promise를 반환한다.
+- `then()` 메소드를 사용해 로드된 모듈을 수행할 작업에 대한 정의가 가능하다.
+- `catch()` 메소드로 모듈 로드 중에 발생하는 오류를 처리할 수 있다.
+
+### 사용법
+```jsx
+// math.js
+export function add(num1, num2) {
+  return num1 + num2;
+}
+
+// static import()
+import { add } from './math';
+
+console.log(add(16, 26));
+
+// dynamic import()
+import("./math").then(math => {
+  console.log(math.add(16, 26));
+});
+```
+
+만약 가져오는 파일에 export가 여러개면 다음과 같이 가져올 수 있다.
+
+```jsx
+// math.js
+export function add(num1, num2) {
+  return num1 + num2;
+}
+
+export function minus(num1, num2) {
+  return num1 - num2;
+}
+
+export default (num) {
+  return num;
+}
+
+// static import()
+import math, { add, minus } from './math';
+
+console.log(math(123), add(16, 26), minus(26, 16));
+
+// dynamic import()
+import("./math").then(({default: math, add, minus}) => {
+  console.log(math(123), add(16, 26), minus(26, 16));
+});
+```
+
+객체 구조 분해 할당으로 받아와 math는 export default 키워드로 내보냈기 때문에 default로 사용해야한다.
+
+> export default와 export 차이
+> export default는 한 파일(모듈)에 하나만 있다는 것을 명확하게 나타내서 원하는 이름으로 import할 수 있다. (이름이 없어도 가능)
+> export는 내보내는 모듈의 이름이 꼭 있어야하며, export한 이름으로 import를 해야한다.
+
+```jsx
+// static import()
+import { setupAdminUser } from './admin.js';
+
+if (user.admin) {
+  setupAdminUser();
+}
+
+// dynamic import()
+if (user.admin) {
+  import('./admin.js').then({ setupAdminUser }) => {
+    setupAdminUser();
+  }
+}
+```
+
+static import() 코드는 실제 관리자만 해당 코드를 실행하지만, 일반 사용자들도 `setupAdminUser()` 함수를 다운로드하게 된다.
+
+만약 admin.js 파일이 엄청 거대한 파일일 경우, 일반 사용자들은 필요없음에도 다운로드해 로드 속도를 저하시킬 수 있다.
+
+따라서 dynamic import()를 사용하게 되면 관리자 기능에 필요한 파일과 코드는 관리자에게만 제공되고, 일반 사용자들은 불필요한 리소스를 다운로드 하지 않기 때문에 초기 로드 속도를 향상시킬 수 있다.
+
+**변수에도 dynamic import()를 적용할 수 있다.**
+```jsx
+// static import
+import englishTranslations from "./en-translations";
+import spanishTranslations from "./sp-translations";
+import frenchTranslations from "./fr-translations"; // 사용하지 않는 대용량의 파일을 import한다.
+
+const user = { locale: "sp" };
+
+let translations;
+
+switch (user.locale) {
+  case "sp":
+    translations = spanishTranslations;
+    break;
+  case "fr":
+    translations = frenchTranslations;
+    break;
+  default:
+    translations = englishTranslations; 
+}
+console.log(translations.HI); // hola
+
+// dynamic import
+const user = { locale: "ko" };
+
+import(`./${user.locale}-translations.js`)
+  .catch(() => import('./en-translations.js')) // 위의 import문에서 에러가 날 경우, catch 구문이 실행되며 영어 번역을 불러온다.
+  .then(({ default: translations }) => {
+    console.log(translations.HI); // catch문의 import가 정상적으로 이루어지면 이어서 then이 실행되며 hi가 출력된다.
+  });
+```
+
+또한 `async / await` 구문과 함께 사용할 수도 있다.
+```jsx
+export default async function Logo({ name }: { name: string }) {
+	const reName = name[0].toUpperCase() + name.slice(1) + 'Logo'
+	const res = await import(`@/data/svgs/${reName}.svg`)
+	const Logo = res.default
+	return <Logo />
+}
+```
+
+## React.lazy
+React.lazy 함수를 사용하면 동적 import를 사용해 컴포넌트가 사용되는 시점에 가져오도록 구현할 수 있다.
+
+즉, 컴포넌트를 렌더링하는 시점에서 비동기적으로 로딩할 수 있게 해준다.
+
+React.lazy로 불러오는 컴포넌트는 export default로 내보내야만 한다.
+
+### 사용법
+```jsx
+const Component = React.lazy(() => import('./Component'));
+const Wrapper = () => {
+  return <div><Component/></div>
+}
+```
+
+이렇게 사용하게 되면 아무것도 없는 페이지가 노출되었다가, 해당 컴포넌트가 보이게 된다.
+
+## Suspense
+React.lazy로 불러온 컴포넌트는 단독으로 쓰일 수 없고, Suspense 컴포넌트 하위에서 렌더링되어야 한다.
+
+Suspense는 로딩을 완료할 때까지 fallback UI를 보여주다가 로딩이 완료되면 코드 스플링된 자식 컴포넌트를 보여준다.
+
+### 사용법
+```jsx
+const Component = React.lazy(() => import('./Component'));
+const Wrapper = () => {
+  const [visible, setVisible] = React.useState(false);
+  const onClick = () => setVisible(true);
+  return (
+    <div>
+      <button onClick={onClick}>클릭</button>
+      <React.Suspense fallback={<div>Loading.....</div>}>
+        {visible && <Component/>}
+      </React.Suspense>
+    </div>
+  )
+}
+```
+
+버튼을 클릭하면 visible이 true로 상태가 바뀌고 `Component`가 렌더링되는 중에 fallback UI가 보이다가 완료되면 해당 컴포넌트가 렌더링된다.
+
+SPA로 페이지를 개발하고 있다면, 코드 스플리팅을 이용해 페이지 별로 파일을 나눌 수 있다.
+
+```jsx
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+const Home  = lazy(() => import('./page/Home '));
+const About = lazy(() => import('./routes/About'));
+const Page = () => (
+  <Router>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/" component={<Home/>}/>
+        <Route path="/about" component={<About/>}/>
+      </Routes>
+    </Suspense>
+  </Router>
+);
+```
