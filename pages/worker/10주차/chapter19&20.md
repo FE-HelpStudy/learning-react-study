@@ -52,7 +52,7 @@ Categories
 
 ## Navigation 모드의 Performance 를 측정
 
-![initial_landing](./image//initial.PNG)
+![initial_landing](./image/initial.PNG)
 
 Performance 측정 후 각 지표를 확인한다
 
@@ -114,7 +114,7 @@ Image 컴포넌트의 아래의 속성으로 전략에 맞는 최적화를 진�
 
 ### before
 
-![initial_landing](./image//initial.PNG)
+![initial_landing](./image/initial.PNG)
 
 ```typescript
 // 개선 전
@@ -165,7 +165,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 진단 섹션에서 참고한 결과 
 
-![](./image//image_diagnostics.png)
+![](./image/image_diagnostics.png)
 
 LCP 가 lazy loading 되고 있고 load delay 가 1.7ms 로 가장 많은 포션을 차지한다.
 
@@ -173,7 +173,7 @@ LCP에 preload를 적용하는 priority 속성을 적용하고 jpg 파일 보다
 ([단, avif 파일은 호환성 문제에서 webp 파일보다 자유롭지 않다](https://namu.wiki/w/AVIF#s-3.1))
 
 ![after_preload_avif](./image/after_preload.PNG)
-![스크립트 최적화 전](./image//avif+preload.PNG)
+![스크립트 최적화 전](./image/avif+preload.PNG)
 html, font, preload 된 이미지, css, script 순으로 로드되는 것을 네트워크 탭에서 확인 가능하다.
 
 당장 필요하지 않은 script 인 portone 결제 모듈은 결제 페이지에서 불러오는 것으로 변경한다.
