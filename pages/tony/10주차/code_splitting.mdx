@@ -5,21 +5,21 @@
 
 즉, 모듈 간의 의존성 관계를 파악해 그룹화시켜주는 작업이다.
 
-번들링을 하는 이유 중 하나는 파일 크기 문제를 해결하기 위해서로써, 번들링된 파일은 원본 파일보다 크기가 작아져 파일 실행 속도와 로딩 속도가 빨라진다.
+번들링을 하는 이유 중 하나는 파일 크기 문제를 해결할 수 있고, 번들링된 파일은 원본 파일보다 크기가 작아 파일 실행 속도와 로딩 속도가 빨라진다.
 
 # Code Splitting
-애플리케이션의 규모가 커지면 번들링을 하더라도 번들 사이즈도 커지게 된다. 특히 큰 규모의 서드 파티 라이브러리를 추가하고 앱이 커져 번들된 파일도 커지게 될 때 해결할 수 있는 방안이 코드 스플리팅이다.
+애플리케이션의 규모가 커지면 번들링을 하더라도 번들 사이즈는 커지게 된다. 특히 큰 규모의 서드 파티 라이브러리를 추가하고 앱이 커져 번들된 파일도 커지게 되므로, 번들링만으로는 한계가 있다. 따라서 이를 해결할 수 있는 방안이 코드 스플리팅이다.
 
 코드 스플리팅을 하면 초기에 필요하지 않은 컴포넌트 정보들을 불러오지 않고 필요한 시점에서 불러와 로딩 속도를 향상시킬 수 있다.
 
 코드 스플리팅을 적용하는 다양한 방법에 대해 알아보자.
 
-## import()
+## Dynamic import()
 코드 스플리팅을 적용시키는 방법으로 dynamic import() 문법을 사용하는 것이다.
 
 dynamic import()를 사용하면 애플리케이션에 필요한 모듈을 필요한 시점에 로드할 수 있어 초기 로딩 속도를 향상시키고, 필요하지 않은 모듈의 로드를 지연시킬 수 있다.
 
-dynamic import()는 모듈을 읽고 해당 모듈이 export하는 것들을 객체로 담아 fulfilled Promise를 반환한다.
+dynamic import()는 모듈을 읽고 해당 모듈이 export하는 것들을 객체로 담아 fulfilled한 Promise를 반환한다.
 - `then()` 메소드를 사용해 로드된 모듈을 수행할 작업에 대한 정의가 가능하다.
 - `catch()` 메소드로 모듈 로드 중에 발생하는 오류를 처리할 수 있다.
 
@@ -186,7 +186,7 @@ SPA로 페이지를 개발하고 있다면, 코드 스플리팅을 이용해 페
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 const Home  = lazy(() => import('./page/Home '));
-const About = lazy(() => import('./routes/About'));
+const About = lazy(() => import('./page/About'));
 const Page = () => (
   <Router>
     <Suspense fallback={<div>Loading...</div>}>
@@ -198,3 +198,8 @@ const Page = () => (
   </Router>
 );
 ```
+
+### 참고
+- [React 공식문서 - code splitting](https://ko.legacy.reactjs.org/docs/code-splitting.html)
+- [dynamic import로 웹페이지 성능 올리기](https://pks2974.medium.com/dynamic-import-%EB%A1%9C%EC%9B%B9%ED%8E%98%EC%9D%B4%EC%A7%80-%EC%84%B1%EB%8A%A5-%EC%98%AC%EB%A6%AC%EA%B8%B0-caf62cc8c375)
+- [동적 불러오기 (Dynamic import)](https://velog.io/@wlwl99/%EB%8F%99%EC%A0%81-%EB%B6%88%EB%9F%AC%EC%98%A4%EA%B8%B0-Dynamic-import)
