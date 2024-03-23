@@ -12,13 +12,9 @@
     "type" : "separator"
   },
   "learning-react-study" : {
-    "title" : "리액트를 다루는 기술",
-    "theme": {
-      "timestamp": true
-    }
+    "title" : "리액트를 다루는 기술"
   },
   "modern-react-deep-dive" : {
     "title" : "모던 리액트 Deep Dive"
-
   }
 }

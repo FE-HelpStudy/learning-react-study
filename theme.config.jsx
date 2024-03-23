@@ -66,7 +66,6 @@ export default {
               year: 'numeric'
             })}
           </time>
-          <p>{timestamp}</p>
         </p>)
       }
       </>
