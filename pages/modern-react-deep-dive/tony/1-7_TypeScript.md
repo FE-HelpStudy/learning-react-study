@@ -32,7 +32,7 @@
 any 타입은 모든 동작을 허용해준다고 생각하면 된다.
 
 아래 사진은 문자열로 선언한 str을 숫자형 메서드인 toFixed를 사용할 때 any 타입은 에러가 발생하지 않는다. 실제로 이 코드는 런타임 때 에러를 발생시킬 것이고, 이는 타입스크립트를 사용하지 않는 것과 다름없다.
-![TypeScript1](https://velog.velcdn.com/images/taemin-jang/post/2af23314-db65-4642-ad65-e665ab433e01/image.png)
+![TypeScript1](./TypeScript1.png)
 
 any를 사용하게 되면 any 타입으로 타이핑한 변수를 다른 변수에 할당하면 해당 변수도 any 타입을 가지게 됩니다.
 
@@ -41,19 +41,19 @@ any를 사용하게 되면 any 타입으로 타이핑한 변수를 다른 변수
 만약 자바스크립트에서 타입스크립트로 변경할 때와 같이 타입을 단정할 수 없는 경우 any 대신 unknown을 사용하는 것이 좋다.
 
 unknown은 any와 같이 top type으로 모든 값을 할당할 수 있지만, 타입 좁히기(type narrowing)를 하지 않으면 어떠한 동작도 수행할 수 없다.
-![TypeScript2](https://velog.velcdn.com/images/taemin-jang/post/542e20e5-07ca-4a4d-9a93-273fcff73347/image.png)
+![TypeScript2](./TypeScript2.png)
 
 callback은 unknown 타입으로 아직 알 수 없는 값이기 때문에 바로 사용할 수 없다. 따라서 unknown 타입으로 선언된 변수를 사용하려면 type narrowing을 해야하므로 any 보다 더 안전하게 사용할 수 있다.
 
 unknown 타입과 반대되는 bottom type으로 never 타입은 어떠한 타입으로도 대입할 수 없다.
-![TypeScript3](https://velog.velcdn.com/images/taemin-jang/post/4c68a50a-cb63-4e4b-af45-0582953771a6/image.png)
+![TypeScript3](./TypeScript3.png)
 
 never1 타입은 string과 number를 교차 타입인데 만족하는 타입은 없기 때문에 never로 선언된다. never2 타입도 마찬가지다.
 
 neverFunc와 neverFunc1은 둘다 에러를 반환하는데 함수 선언문은 throw를 하더라도 반환 값의 타입이 void인 반면 함수 표현식은 never가 된다.
 
 > Top Type과 Bottom Type
-![TypeScript4](https://velog.velcdn.com/images/taemin-jang/post/a4e16633-795f-4f5a-a653-660f816f5037/image.png)
+![TypeScript4](./TypeScript4.png)
 
 ## 타입 가드를 활용하자
 Type guards는 타입을 좁히는데 사용할 수 있는 다양한 방법이 있다.
@@ -189,7 +189,8 @@ const hello1: Hello1 = {
 ```
 
 인덱스 시그니처를 처음 사용하다보면 다음과 같은 에러가 발생할 수 있다
-![TypeScript5](https://velog.velcdn.com/images/taemin-jang/post/8ffab496-1dbd-4b43-ac95-da3a04b0e6b5/image.png)
+![TypeScript5](./TypeScript5.png)
+
 이렇게 발생한 이유는 `Object.keys(hello)`의 타입은 `string[]`이고, hello의 타입은 Hello이기 때문에 타입 불일치가 일어난다.
 
 따라서 이를 해결하기 위해서는 다양한 방법이 있다.
@@ -224,7 +225,8 @@ Object.keys가 string[]으로 강제된 이유는 자바스크립트의 덕 타�
 > 덕 타이핑(duck typing)과 구조적 타이핑
 - 덕 타이핑은 아래 사진과 같이 콘센트든 돼지코이든 이름은 상관없이 꽂을 수만 있으면 그것을 콘센트로 부를 수 있다는 것처럼 객체가 열려 있는 구조로 만들어져 있다. (다형성)
 자바스크립트가 덕 타이핑으로 런타임에 타입을 체크한다.
-![TypeScript6](https://velog.velcdn.com/images/taemin-jang/post/8e9519ab-a9f7-493f-8ed2-6141c8c5140f/image.png)
+![TypeScript6](./TypeScript6.png)
+
 - 구조적 타이핑은 덕 타이핑을 모델링하지만 타입 시스템 기반에서 컴파일 타임에서 타입을 체크한다.
 타입스크립트가 구조적 타이핑 특징을 가진다.
 
