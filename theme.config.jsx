@@ -11,7 +11,7 @@ const githubImageURL = {
   "bella": "https://github.com/yunjiisy.png",
   "oliv": "https://github.com/busy-joj.png",
   "may": "https://github.com/p-so-yeon.png",
-  "deon": "https://github.com/kimdoyeonn.png"
+  "dawn": "https://github.com/kimdoyeonn.png"
 }
 
 const DEFAULT_LOCALE = 'ko-KR';
