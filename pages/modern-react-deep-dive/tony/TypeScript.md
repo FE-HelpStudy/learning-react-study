@@ -1,7 +1,3 @@
----
-  writer: 'tony'
-  velog: 'https://velog.io/@taemin-jang/typescript'
----
 
 # 타입스크립트?
 타입스크립트는 기존 자바스크립트 문법에 타입이 추가된 언어다.
