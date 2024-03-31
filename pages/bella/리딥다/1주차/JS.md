@@ -31,7 +31,7 @@ v8이 뭐고 어떤 역할을 해주는뎅?
 
 ---
 
-![JS1.png](./JS1/ㅎ.png)
+![JS1.png](./image/JS1.jpeg)
 
 ### 콜스택
 
@@ -73,17 +73,17 @@ console.log('세 번째');
 
 먼저 `console.log("첫 번째");` 코드가 콜스택에 쌓이고 실행이 될것이다.
 
-![JS2.png](./image/JS2.png)
+![JS2.png](./image/JS2.jpeg)
 
 다음 `setTimeout` 함수는 비동기 함수이므로 외부의 스레드인 Web API로 넘어가 처리가 된다. 물론 콜스택에서 사라진다.
 
 그리고 `console.log("세 번째");` 가 실행된다.
 
-![JS3.png](./image/JS3.png)
+![JS3.png](./image/JS3.jpeg)
 
 이렇게 옮겨진 비동기 함수는 처리가 완료된 후(1초가 지난 후) setTimeout의 콜백함수는 task queue로 이동하여 대기하게 된다.
 
-![JS4.png](./image/JS4.png)
+![JS4.png](./image/JS4.jpeg)
 
 큐에 대기중인 `Console.log(”두번째”)` 는 이벤트 루프에 의해 콜스택으로 옮겨지고 그제서야 실행이 된다.
 
@@ -95,7 +95,7 @@ console.log('세 번째');
 - Queue에 처리가 완료 된 코드들을 넣음
 - stack이 비면 하나씩 올려보냄
 
-![JS5.png](./image/JS5.png)
+![JS5.png](./image/JS5.jpeg)
 
 위에서는 현의상 큐 하나로만 설명했지만 사실 다양한 큐가 존재한다.
 
