@@ -107,7 +107,7 @@ function Stack() {
 ```
 해당 코드가 업데이트 된다면 이미지처럼 동작한다.
 
-![Stack Reconciler](Stack_Reconciler.png)
+![Stack Reconciler](./Stack_Reconciler.png)
 
 한 번 업데이트가 진행되면 깊은 콜 스택을 만들어 동기로 진행되다보니 다른 작업이 우선시 되어 수행되고 싶어도 중단할 수 없는 문제가 발생하게 된다.
 
@@ -175,7 +175,7 @@ Fiber 작업이 끝나면 리액트는 단순히 포인터만 변경해 `workInP
 > 
 > 이러한 상황을 방지하기 위해 보이지 않는 곳에서 다음으로 그려야 할 그림을 미리 그린 후 완성되면 현재 상태를 새로운 그림으로 바꾸는 기법이다.
 
-![Fiber 트리](Fiber_트리.png)
+![Fiber 트리](./Fiber_트리.png)
 
 위 그림의 순서는 다음과 같다.
 
