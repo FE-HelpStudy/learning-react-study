@@ -1,0 +1,226 @@
+# Props drilling
+중첩된 여러 계층의 컴포넌트에게 props를 전달해주는 것을 의미한다.
+
+이는 해당 props가 필요하지 않은 컴포넌트들도 전달 받을 수 있으며, 중첩된 여러 컴포넌트가 많을수록 어떤 문제가 발생했을 때 해당 props가 어디서부터 왔는지 추적하기가 쉽지 않다.
+
+```jsx
+// App.jsx
+function App() {
+  return (
+    <div className="App">
+      <div className="card">
+        <GrandParent theme="light" />
+      </div>
+    </div>
+  );
+}
+
+// GrandParent.jsx
+function GrandParent({ theme }) {
+  return <Parent theme={theme} />;
+}
+
+// Parent.jsx
+function Parent({ theme }) {
+  return <Child theme={theme} />;
+}
+
+// Child.jsx
+function Child({ theme }) {
+  return <div>theme is {theme}</div>;
+}
+```
+# React Context
+이러한 문제를 해결하는 방법 중 하나로 React Context가 있다.
+
+React Context는 상위 컴포넌트에서 하위 컴포넌트에게 일일이 props를 전달하지 않고 필요한 데이터를 쉽게 사용할 수 있게 해준다.
+
+## 어떤 데이터를 Context로 사용하면 좋을까?
+주로 앱의 모든 컴포넌트에서 사용할 수 있는 데이터를 Context로 사용하면 유용하다.
+
+- 현재 로그인한 유저 정보
+- 테마 데이터 (다크 모드 or 라이트 모드)
+- 지역 or 언어
+- 주로 자주 업데이트할 필요가 없는 데이터 등
+
+리액트 Context는 컴포넌트를 위한 전역 변수처럼 사용되지만, 컴포넌트 전체 상태를 관리하기 위해 만들어진 것이 아니라 데이터를 전역으로 공유해 쉽게 사용하기 위해 만들어진 것이다. (하지만 꼭 전역으로 사용할 필요는 없다.)
+
+### 사용법
+
+```jsx
+// App.jsx
+import { createContext } from 'react';
+
+export const ThemeContext  = createContext('light'); // 라이트모드를 기본으로 하는 Theme context 생성
+
+function App() {
+  return (
+    <div className="App">
+      <div className="card">
+        <ThemeContext.Provider value="dark">
+          // 다크 모드로 변경한 값을 모든 하위 컴포넌트에서 읽을 수 있다.
+          <GrandParent />
+        </ThemeContext.Provider>
+      </div>
+    </div>
+  );
+}
+
+// GrandParent.jsx
+function GrandParent() {
+  return <Parent />;
+}
+
+// Parent.jsx
+function Parent() {
+  return <Child />;
+}
+
+// Child.jsx
+import { useContext } from 'react';
+import { ThemeContext } from '../App';
+
+function Child() {
+  const value = useContext(ThemeContext); // context value
+  return <div>theme is {value}</div>;
+}
+```
+### Context 사용하지 않고 개선하기
+Context를 사용하면 컴포넌트를 재사용하기가 어려워지므로 꼭 필요할 때 써야한다.
+
+그렇기 때문에 Context를 사용하지 않고 개선할 수 있다면 최대한 사용하지 않는 것이 중요하다.
+
+만약 여러 레벨에 걸쳐 props 넘기는 것을 대체하기 위해 context를 사용하기 보다 `컴포넌트 합성`이 더 간단한 해결책일 수 있다.
+> 컴포넌트 합성이란?
+> 
+
+```jsx
+// App.jsx
+function App() {
+  return (
+    <div className="App">
+      <div className="card">
+        <GrandParent name='tony' theme='light' />
+      </div>
+    </div>
+  );
+}
+
+// GrandParent.jsx
+function GrandParent(props) {
+  const {name, theme} = props;
+  const userTheme = <div>{name} is {theme}</div>;
+  return <Parent userTheme={userTheme} />;
+}
+
+// Parent.jsx
+function Parent({ userTheme }) {
+  return <Child userTheme={userTheme} />;
+}
+
+// Child.jsx
+function Child({ userTheme }) {
+  return userTheme;
+}
+```
+이렇게 컴포넌트 합성을 사용하면 name과 theme props를 쓰고 있다는 것을 아는 컴포넌트는 GrandParent 컴포넌트 밖에 없고 나머지 컴포넌트들은 해당 props에 대해 변경이 되어도 신경쓰지 않아도 된다.
+
+또는 children을 통해 똑같이 구현할 수 있다.
+```jsx
+// App.jsx
+function App() {
+  return (
+    <div className="App">
+      <div className="card">
+        <GrandParent>
+          <Parent>
+            <Child name='tony' theme="light" />
+          </Parent>
+        </GrandParent>
+      </div>
+    </div>
+  );
+}
+
+// GrandParent.jsx
+function GrandParent({ children }) {
+  return children;
+}
+
+// Parent.jsx
+function Parent({ children }) {
+  return children;
+}
+
+// Child.jsx
+function Child({ name, theme }) {
+  return <div>{name} is {theme}</div>;
+}
+```
+
+### 주의사항
+context를 잘못 사용하면 provider로 감싼 컴포넌트들이 모두 리렌더링 발생할 수 있다.
+
+아래 코드를 보면 버튼을 클릭할 때마다 하위 컴포넌트들이 모두 리렌더링이 되는 걸 볼 수 있다.
+[소스 코드](https://codesandbox.io/p/sandbox/react-context-rerendering-npct5p?from-embed=&layout=%257B%2522sidebarPanel%2522%253A%2522EXPLORER%2522%252C%2522rootPanelGroup%2522%253A%257B%2522direction%2522%253A%2522horizontal%2522%252C%2522contentType%2522%253A%2522UNKNOWN%2522%252C%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522id%2522%253A%2522ROOT_LAYOUT%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522UNKNOWN%2522%252C%2522direction%2522%253A%2522vertical%2522%252C%2522id%2522%253A%2522cltgkis1n0006356bxuar5781%2522%252C%2522sizes%2522%253A%255B70%252C30%255D%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522EDITOR%2522%252C%2522direction%2522%253A%2522horizontal%2522%252C%2522id%2522%253A%2522EDITOR%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522EDITOR%2522%252C%2522id%2522%253A%2522cltgkis1m0002356brd21f0ih%2522%257D%255D%257D%252C%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522SHELLS%2522%252C%2522direction%2522%253A%2522horizontal%2522%252C%2522id%2522%253A%2522SHELLS%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522SHELLS%2522%252C%2522id%2522%253A%2522cltgkis1n0003356bj9z7ss5h%2522%257D%255D%252C%2522sizes%2522%253A%255B100%255D%257D%255D%257D%252C%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522DEVTOOLS%2522%252C%2522direction%2522%253A%2522vertical%2522%252C%2522id%2522%253A%2522DEVTOOLS%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522DEVTOOLS%2522%252C%2522id%2522%253A%2522cltgkis1n0005356bwuv777zy%2522%257D%255D%252C%2522sizes%2522%253A%255B100%255D%257D%255D%252C%2522sizes%2522%253A%255B50%252C50%255D%257D%252C%2522tabbedPanels%2522%253A%257B%2522cltgkis1m0002356brd21f0ih%2522%253A%257B%2522tabs%2522%253A%255B%257B%2522id%2522%253A%2522cltgkis1m0001356b1irc1oeb%2522%252C%2522mode%2522%253A%2522permanent%2522%252C%2522type%2522%253A%2522FILE%2522%252C%2522filepath%2522%253A%2522%252Fsrc%252Findex.js%2522%257D%255D%252C%2522id%2522%253A%2522cltgkis1m0002356brd21f0ih%2522%252C%2522activeTabId%2522%253A%2522cltgkis1m0001356b1irc1oeb%2522%257D%252C%2522cltgkis1n0005356bwuv777zy%2522%253A%257B%2522tabs%2522%253A%255B%257B%2522id%2522%253A%2522cltgkis1n0004356b6t7vnl4i%2522%252C%2522mode%2522%253A%2522permanent%2522%252C%2522type%2522%253A%2522UNASSIGNED_PORT%2522%252C%2522port%2522%253A0%252C%2522path%2522%253A%2522%252F%2522%257D%255D%252C%2522id%2522%253A%2522cltgkis1n0005356bwuv777zy%2522%252C%2522activeTabId%2522%253A%2522cltgkis1n0004356b6t7vnl4i%2522%257D%252C%2522cltgkis1n0003356bj9z7ss5h%2522%253A%257B%2522tabs%2522%253A%255B%255D%252C%2522id%2522%253A%2522cltgkis1n0003356bj9z7ss5h%2522%257D%257D%252C%2522showDevtools%2522%253Atrue%252C%2522showShells%2522%253Atrue%252C%2522showSidebar%2522%253Atrue%252C%2522sidebarPanelSize%2522%253A15%257D)
+
+```jsx
+export const UserContext = createContext();
+export const UserProvider = UserContext.Provider;
+
+function App() {
+  console.log("App rendering");
+  const [user, setUser] = useState({
+    name: "Alice",
+    desc: "React developer",
+  });
+
+  return (
+    <UserProvider value={{ user, setUser }}>
+      <Sidebar />
+      <Main />
+    </UserProvider>
+  );
+}
+
+function UserInfo() {
+  console.log("UserInfo rendering");
+  const { user, setUser } = useContext(UserContext);
+  return (
+    <div>
+      <p>
+        {user.name} ({user.desc})
+      </p>
+      <button
+        onClick={() => setUser({ name: "Charlie", desc: "Perl developer" })}
+      >
+        Change user to Charlie
+      </button>
+    </div>
+  );
+}
+```
+
+아래 코드는 children props를 통해 최적화한 코드로 버튼 클릭 시 변경되는 컴포넌트만 리렌더링 되는 걸 볼 수 있다.
+[소스 코드](https://codesandbox.io/p/sandbox/react-context-coejeoghwa-xntsy7?from-embed=&layout=%257B%2522sidebarPanel%2522%253A%2522EXPLORER%2522%252C%2522rootPanelGroup%2522%253A%257B%2522direction%2522%253A%2522horizontal%2522%252C%2522contentType%2522%253A%2522UNKNOWN%2522%252C%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522id%2522%253A%2522ROOT_LAYOUT%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522UNKNOWN%2522%252C%2522direction%2522%253A%2522vertical%2522%252C%2522id%2522%253A%2522cltgkm3ht0006356bx173fsjg%2522%252C%2522sizes%2522%253A%255B70%252C30%255D%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522EDITOR%2522%252C%2522direction%2522%253A%2522horizontal%2522%252C%2522id%2522%253A%2522EDITOR%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522EDITOR%2522%252C%2522id%2522%253A%2522cltgkm3hs0002356bg0jik77y%2522%257D%255D%257D%252C%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522SHELLS%2522%252C%2522direction%2522%253A%2522horizontal%2522%252C%2522id%2522%253A%2522SHELLS%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522SHELLS%2522%252C%2522id%2522%253A%2522cltgkm3hs0003356bozoukdn5%2522%257D%255D%252C%2522sizes%2522%253A%255B100%255D%257D%255D%257D%252C%257B%2522type%2522%253A%2522PANEL_GROUP%2522%252C%2522contentType%2522%253A%2522DEVTOOLS%2522%252C%2522direction%2522%253A%2522vertical%2522%252C%2522id%2522%253A%2522DEVTOOLS%2522%252C%2522panels%2522%253A%255B%257B%2522type%2522%253A%2522PANEL%2522%252C%2522contentType%2522%253A%2522DEVTOOLS%2522%252C%2522id%2522%253A%2522cltgkm3hs0005356b2nglvbr5%2522%257D%255D%252C%2522sizes%2522%253A%255B100%255D%257D%255D%252C%2522sizes%2522%253A%255B50%252C50%255D%257D%252C%2522tabbedPanels%2522%253A%257B%2522cltgkm3hs0002356bg0jik77y%2522%253A%257B%2522tabs%2522%253A%255B%257B%2522id%2522%253A%2522cltgkm3hq0001356boipahmzc%2522%252C%2522mode%2522%253A%2522permanent%2522%252C%2522type%2522%253A%2522FILE%2522%252C%2522filepath%2522%253A%2522%252Fsrc%252Findex.js%2522%257D%255D%252C%2522id%2522%253A%2522cltgkm3hs0002356bg0jik77y%2522%252C%2522activeTabId%2522%253A%2522cltgkm3hq0001356boipahmzc%2522%257D%252C%2522cltgkm3hs0005356b2nglvbr5%2522%253A%257B%2522tabs%2522%253A%255B%257B%2522id%2522%253A%2522cltgkm3hs0004356bhmk6vlnh%2522%252C%2522mode%2522%253A%2522permanent%2522%252C%2522type%2522%253A%2522UNASSIGNED_PORT%2522%252C%2522port%2522%253A0%252C%2522path%2522%253A%2522%252F%2522%257D%255D%252C%2522id%2522%253A%2522cltgkm3hs0005356b2nglvbr5%2522%252C%2522activeTabId%2522%253A%2522cltgkm3hs0004356bhmk6vlnh%2522%257D%252C%2522cltgkm3hs0003356bozoukdn5%2522%253A%257B%2522tabs%2522%253A%255B%255D%252C%2522id%2522%253A%2522cltgkm3hs0003356bozoukdn5%2522%257D%257D%252C%2522showDevtools%2522%253Atrue%252C%2522showShells%2522%253Atrue%252C%2522showSidebar%2522%253Atrue%252C%2522sidebarPanelSize%2522%253A15%257D)
+```jsx
+function UserProvider({ children }) {
+  const [user, setUser] = useState({
+    name: "Alice",
+    desc: "React developer",
+  });
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+```
+
+
+#### 참고
+- [리액트 공식문서 - context](https://ko.legacy.reactjs.org/docs/context.html)
+- [초보자를 위한 리액트 Context - 완벽 가이드 (2021)](https://www.freecodecamp.org/korean/news/cobojareul-wihan-riaegteu-context-wanbyeog-gaideu-2021/)
+- [React Context API 톺아보기](https://www.datoybi.com/context-api/)
+- [Codeguage - React Contexts](https://www.codeguage.com/courses/react/advanced-contexts)
