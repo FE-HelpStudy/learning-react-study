@@ -1,0 +1,106 @@
+# 제어 컴포넌트 vs 비제어 컴포넌트
+form 데이터를 리액트에서 2가지 방식으로 다루고 있다.
+
+값이 제어되는 컴포넌트를 제어 컴포넌트, 값이 제어되지 않는 컴포넌트를 비제어 컴포넌트라고 한다.
+
+그렇다면 값이 제어되는 것은 무엇이고, 제어되지 않는 것은 무엇일까?
+
+## 제어 컴포넌트
+보통 HTML에서 `input`, `textarea`, `select`와 같은 폼 엘리먼트는 사용자의 입력을 기반으로 state를 관리하고 업데이트한다.
+
+이때 리액트에서는 입력 값을 `setState`로 값을 저장하여 관리하는 방식을 제어 컴포넌트라고 한다.
+
+즉, form 데이터 변경에 따라 컴포넌트도 렌더링되는 것을 의미한다.
+
+```jsx
+import React, { useState } from 'react';
+
+function MyInput() {
+  const [inputValue, setInputValue] = useState(null);
+
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  return <input onChange={(e) => handleChange(e)} value={inputValue} />;
+}
+```
+
+제어 컴포넌트는 사용자가 입력한 값과 저장되는 값이 실시간으로 `동기화`된다.
+
+![제어 컴포넌트](./%EC%A0%9C%EC%96%B4%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8.gif)
+
+
+### 제어 컴포넌트 언제 사용할까
+1. 유효성 검사
+2. 실시간으로 input 값을 검사해야 하는 경우
+3. 조건에 따라 버튼이 활성화 되어야 하는 경우
+
+### 제어 컴포넌트 사용 시 문제점
+state로 관리하다보니 입력한 데이터 상태와 저장한 데이터 상태가 항상 일치한다. 즉, 사용자가 입력한 모든 데이터가 동기화된다.
+
+모든 데이터가 동기화 된다는 것은 불필요한 값도 갱신이 된다는 것으로 불필요한 렌더링, 이를 통한 자원 낭비의 문제로도 연결 될 수 있다.
+
+이를 해결하기 위한 방법으로는 쓰로틀링과 디바운싱을 사용할 수 있다.
+
+> 쓰로틀링(throttling)이란, 마지막 함수가 호출된 후 일정 시간이 지나기 전에 다시 호출되지 않도록 하는 방법
+>
+> 주로 스크롤을 올리거나 내릴 때 사용한다. ex) 스크롤을 올리거나 내릴 때 스크롤 이벤트가 매우매우 많이 발생한다. 복잡한 로직이 같이 있다면 스크롤 이벤트와 많이 발생하면서 렉이 발생할 수 있는데, 쓰로틀링을 사용하면 몇 초에 한 번, 또는 몇 밀리초에 한 번씩 실행하도록 제한두는 방식이다.
+> 
+> 디바운싱(debouncing)이란, 연이어 호출되는 함수들 중 마지막 함수 또는 맨 처음 함수만 호출되도록 하는 방법
+>
+> 주로 검색 api 호출할 때 사용한다. ex) `ㅇ`,`아`,`안`,`안ㄴ`,`안녀`,`안녕` '안녕'이라고 검색하면 6번의 호출을 하게 되므로 디바운스를 사용하면 마지막 '안녕'을 다 쳤을 때 요청하게된다.
+
+
+## 비제어 컴포넌트
+비제어 컴포넌트는 기존의 바닐라 자바스크립트처럼 폼을 제출할 때 값을 얻어오는 방식과 유사하다.
+
+즉, 비제어 컴포넌트는 `setState`를 쓰지 않고 `ref`를 통해 DOM 요소에 접근하여 값을 얻는다.
+
+state로 관리하는 것이 아닌 DOM API를 통해서 관리하는 것이다.
+
+```jsx
+import React, { useRef } from 'react';
+
+function App() {
+  return <MyInput />;
+}
+
+function MyInput() {
+  const inputNode = useRef(null);
+
+  return <input ref={inputNode} />;
+}
+
+export default MyInput;
+```
+
+비제어 컴포넌트는 state로 값을 관리하지 않기 때문에 값이 업데이트 될 때마다 리렌더링이 되지 않으므로 성능상의 이점이 있다.
+
+![비제어 컴포넌트](./%EB%B9%84%EC%A0%9C%EC%96%B4%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8.gif)
+
+### 비교한 결과
+
+| 기능 | 비제어 컴포넌트 | 제어 컴포넌트 |
+| :--- | :----------: | :------------: |
+| 일회성 정보 검색 (예: 제출) | O | O |
+| 제출할 때 값 검증 | O | O |
+| 실시간으로 필드 값의 유효성 검사 | X | O |
+| 조건부로 제출 버튼 비활성화 | X | O |
+| 실시간으로 입력 형식 적용하기 (예: 숫자만 가능하게) | X | O |
+| 하나의 데이터에 대한 여러 입력 | X | O |
+| 동적 입력 | X | O |
+
+> 실시간으로 값에 대한 피드백 => 제어 컴포넌트 사용
+>
+> 즉각적인 피드백 불필요, 제출 시에만 값이 필요, 불필요한 렌더링 제거로 성능 향상 => 비제어 컴포넌트 사용
+>
+> 이러한 form을 최적화하여 사용할 수 있도록 제공하는 `React-Hook-Form`이 있다.
+
+상황에 맞게 판단하여 사용하는 것이 가장 바람직하다.
+
+### 참고
+- [React 비제어 컴포넌트 공식문서](https://ko.legacy.reactjs.org/docs/uncontrolled-components.html)
+- [React 제어 컴포넌트 공식문서](https://ko.legacy.reactjs.org/docs/forms.html#controlled-components)
+- [Controlled and uncontrolled form inputs in React don't have to be complicated](https://goshacmd.com/controlled-vs-uncontrolled-inputs-react/)
+- [제로초의 쓰로틀링과 디바운싱](https://www.zerocho.com/category/JavaScript/post/59a8e9cb15ac0000182794fa)

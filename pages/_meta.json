@@ -1,3 +1,20 @@
 {
-  "index": "리액트를 다루는 기술 스터디"
+  "index" : {
+    "title" : "프론트 스터디 소개",
+    "theme": {
+      "breadcrumb": false,
+      "footer": false,
+      "toc": true,
+      "timestamp": false
+    }
+  },
+  "---": {
+    "type" : "separator"
+  },
+  "learning-react-study" : {
+    "title" : "리액트를 다루는 기술"
+  },
+  "modern-react-deep-dive" : {
+    "title" : "모던 리액트 Deep Dive"
+  }
 }
