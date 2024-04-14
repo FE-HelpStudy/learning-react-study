@@ -1,0 +1,51 @@
+# Next.js 톱아보기
+
+## Next.js란?
+
+Vercel에서 만든 풀스택 웹 애플리케이션을 만들기 위한 리액트 기반의 프레임워크입니다. PHP에 영감을 받아서 만들어졌으며, 실제로 PHP의 대용품으로 사용되기 위해 만들었다고 언급한 적이 있다고 합니다.
+
+현재 2024년 4월 기준으로 v15까지 릴리즈됐으며 모기업인 Vercel의 전폭적인 지원을 받아 꾸준히 새로운 기능을 추가하여 릴리즈하고 있기 때문에 현재는 리액트에서 서버 사이드 랜더링을 고려하고 있다면 Next.js를 선택하는 것이 현재로서는 가장 합리적인 선택으로 보입니다.
+실제로 React 개발자들과도 긴밀하게 협업하고 있는 것으로 보이는 것이, React 공식문서에서도 프로젝트를 생성할 때 `create-react-app` 대신 `create-next-app`을 사용할 것을 권장하고 있습니다.
+
+그리고 Vercel은 Next.js 뿐만 아니라 SWR, SWC, Turbopack, Svelte 등 웹 생태계 전반에 영향력이 있는 프로젝트를 계속해서 개발하거나 인수하고 있어 먼 미래에는 모르겠지만 현재로서는 리액트 기반의 프로젝트에서 Next.js를 선택하는 것이 합리적인 선택이라 할 수 있습니다.
+
+- [SWR](https://swr.vercel.app/ko)
+  데이터를 가져오기 위한 React Hooks, SWR이라는 이름은 HTTP 캐시 무효화 전략인 `stale-while-revalidate`에서 유래되었습니다.
+  SWR은 먼저 캐시에서 데이터를 반환한 후(stale), 요청을 보내고(reavalidate), 최종적으로 최신화된 데이터를 가져옵니다.
+- [SWC](https://swc.rs/)
+  Rust 기반의 웹용 플랫폼, Next.js, Parcel, Deno와 같은 도구에서 사용하고 있습니다. 컴파일과 번들링 모두 사용할 수 있습니다.
+  싱글 스레드에서 Babel보다 20배 빠르고, 4코어에서는 70배 빠릅니다.
+- Turbopack
+  Rust 기반의 JavaScript, TypeScript에 최적화된 번들러
+- Svelte
+  프론트엔드 웹 프레임워크, React, Vue.js와는 다르게 가상 DOM을 사용하지 않는 것이 특징
+
+## Next.js에서의 라우팅
+
+Next.js는 서버 사이드 랜더링을 수행하지만 동시에 SPA 같이 클라이언트 사이드 랜더링도 수행합니다.
+
+이 말이 처음에는 혼란스러웠는데, 정리해보자면,
+
+- 최초 페이지 랜더링은 서버에서 수행됩니다. 
+- 하지만 그 후 `Link`, `router.push`를 사용하여 페이지를 이동하면 클라이언트 사이드 라우팅/랜더링 방식으로 작동합니다.
+
+이러한 방식은 사용자에게 최초 페이지를 빠르게 제공할 수 있다는 서버 사이드 랜더링의 장점과 애플리케이션처럼 자연스럽게 라우팅되는 클라이언트 사이드 랜더링의 장점을 둘다 살린 것이라 볼 수 있습니다.
+
+## Next.js 스타일 적용하기
+
+- 전역 CSS: `/app/layout.tsx`에 `import`하여 적용합니다.(`app` 기준)
+- 컴포넌트 레벨 CSS: `[name].module.css`로 명명하여 스타일을 적용하면 다른 컴포넌트와 동일한 클래스명으로 인한 충돌이 발생하지 않도록 고유한 클래스 명으로 최적화하여 적용된다.
+- SCSS/SASS: SASS 패키지를 설치하여 별도의 설정 없이 사용합니다. 그 외에는 CSS와 동일하게 사용이 가능합니다.
+- [CSS-in-JS](https://nextjs.org/docs/app/building-your-application/styling/css-in-js):
+  - CSS-in-JS는 JavaScript 런타임을 필요로 하기 때문에 서버 컴포넌트에서는 현재 지원하지 않습니다. 서버 컴포넌트, 스트리밍 같은 최신 리액트 기능과 CSS-in-JS가 함께 동작하려면 라이브러리 제작자가 동시 랜더링을 포함하는 버전의 리액트를 지원해야합니다.
+  - styled-component 같은 CSS-in-JS는 서버 사이드 랜더링에서 동작하기 위한 [별도의 작업](https://nextjs.org/docs/app/building-your-application/styling/css-in-js#styled-components)이 필요합니다. 
+  - Next.js 버전마다, 라이브러리마다 적용하는 코드의 형태는 다르지만, 서버에서 CSS-in-JS 스타일을 모아 서버 사이드 랜더링 시에 한꺼번에 제공하는 과정을 거치게 됩니다.
+
+## `next.config.js`
+
+- `basePath`: 기본은 ''이고 'docs' 같은 값을 입력하면 `localhost:3000/docs`에 서비스가 시작됩니다. url을 위한 일종의 접두사입니다. 여기에 값을 입력했다고 하더라도 `<Link>`나 `router.push` 등 같은 Next.js에서 제공하는 방법이 아닌 `<a>`, `window.location.push` 같은 방법으로 라우팅을 할 경우 적용되지 않습니다.
+- `swcMinify`: swc를 사용하여 코드를 압축할지 설정합니다. Next.js 13 버전부터 기본값이 `true`이고, 15부터는 기본 동작 & 삭제되므로 duplicated.
+- `redirects`, `rewrites`: redirect, rewrite에 대한 설정 
+- `poweredByHeader`: `X-powered-by` 헤더를 추가해줌, 보안 관련 솔루션에서는 `powered-by` 헤더를 취약점으로 분류하기 때문에 `false`로 설정하는 것이 좋습니다.
+- `reactStrictMode`: 리액트의 엄격 모드를 설정할지 여부, 기본은 `false`
+- `assetPrefix`: next에서 빌드된 결과물을 동일한 호스트가 아닌 다른 CDN 등으로 업로드하고자한다면 CDN 주소를 명시합니다. 정적 리소스를 별도의 CDN에 업로드하고 싶다면 이 기능을 활용하면 됩니다.
