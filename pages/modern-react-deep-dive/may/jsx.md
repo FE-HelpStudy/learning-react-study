@@ -55,7 +55,7 @@
   ```
   -JSXFragment : 값으로 별도 속성을 갖지 않는 형태의 JSX 요소가 들어갈 수 있다. 즉 비어있는 형태도 허용된다. <> </>
 
-### 3)JSXChildren
+### 3) JSXChildren
 
 JSXElement 의 자식 값을 나타낸다. JSX 는 속성을 가진 트리구조를 나타내기 위해 만들어졌기 때문에 JSX 로 부모와 자식 관계를 나타낼 수 있으며, 그 자식을 JSXChildren 이라고 한다.
 
