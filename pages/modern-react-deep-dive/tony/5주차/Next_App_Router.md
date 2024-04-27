@@ -322,6 +322,8 @@ export default function ParentServerComponent() {
 # Next.js에서 RSC
 Next.js 13 App 디렉토리에서는 과거 서버 사이드 렌더링과 정적 페이지 제공을 위해 이용하던 `getServerSideProps`, `getStaticProps`, `getInitialProps`가 /app 디렉토리 내부에서는 삭제됐다.
 
+## Fetch API의 확장
+
 그 대신 모든 데이터 요청은 웹에서 제공하는 표준 API인 fetch를 기반으로 이뤄진다.
 ```tsx
 async function getData() {
@@ -346,3 +348,64 @@ export default async function Page() {
 }
 ```
 
+또한 fetch API를 확장해 같은 서버 컴포넌트 트리 내에서 동일한 요청이 있다면 재요청이 발생하지 않도록 중복 제거했다.
+
+![fetch_api](./fetch_api.png)
+
+React Query와 비슷하게 fetch 요청에 대한 내용을 서버에서 캐싱하여 클라이언트에서 별도의 요청이 없는 이상 데이터를 최대한 캐싱해서 중복된 요청을 방지한다.
+
+## 정적 렌더링과 동적 렌더링
+Next.js 13에서는 정적인 라우팅은 기본적으로 빌드 타임에 렌더링을 미리 해두고 캐싱해서 재사용할 수 있게 한다.
+
+동적인 라우팅에 대해서는 서버에 매번 요청이 올 때마다 컴포넌트를 렌더링한다.
+
+```jsx
+  // 주소가 정적으로 결정돼 있기 때문에 정적 렌더링으로 동작한다.
+  const staticRendering = await fetch('https://jsonplaceholder.typicode.com/posts');
+  // no-cache 옵션으로 캐싱하지 않도록 설정해서 동적 렌더링으로 동작한다.
+  // Next.js에서 제공하는 {next: {revalidate: 0}} 옵션을 사용해도 동일하게 동작한다.
+  // 또한 Next.js에서 제공하는 next.headers나 next/cookie를 사용해도 동적 렌더링으로 동작한다.
+  const dynamicRendering = await fetch('https://jsonplaceholder.typicode.com/posts', {cache: 'no-cache'}); 
+```
+
+만약 해당 데이터의 유효한 시간을 정해두고 해당 시간이 지나면 다시 데이터를 불러와 렌더링하려면 revalidate를 사용하면 된다.
+```tsx
+// app/page.tsx
+
+// revalidate라는 변수를 선언해서 페이지별로 정의 가능
+export const revalidate = 60;
+
+// fetch 옵션으로 제공하는 것도 가능
+  const revalidateRendering = await fetch('https://jsonplaceholder.typicode.com/posts', {next: {revalidate: 60}}); 
+```
+
+1. 최초 요청 시 미리 정적으로 캐시한 데이터를 보여준다.
+2. 이 캐시된 요청은 revalidate에 선언된 값만큼 유지된다.
+3. 만약 해당 시간이 지나도 일단 캐시된 데이터를 보여주지만, 백그라운드에서 다시 데이터를 불러온다.
+4. 요청한 작업이 성공적이면 캐시된 데이터를 갱신하고, 그렇지 않다면 과거 데이터를 보여준다.
+
+## 스트리밍
+waterfall 문제를 스트리밍을 활용하면 해결할 수 있다.
+
+모든 컴포넌트를 기다리는 대신, 컴포넌트가 완성되는 대로 클라이언트에 보여주면 사용자는 페이지가 완성될 때까지 기다릴 필요가 없고, 페이지가 로딩 중이라는 인식을 명확하게 심어줄 수 있다.
+
+- 경로에 loading.tsx 생성
+loading은 예약어로, 렌더링이 완료되기 전에 보여줄 수 있는 컴포넌트다.
+자동으로 다음 구조처럼 Suspense와 같이 배치된다.
+```tsx
+<Layout>
+  <Header />
+  <SideNav />
+  <Suspense fallback={<Loading />}>
+    <Page />
+  </Suspense>
+</Layout>
+```
+
+또는 Suspense를 직접 배치하면서 더욱 효율적으로 사용할 수 있다.
+
+### 참고
+- 모던 리액트 Deep Dive
+- [Next.js - caching](https://nextjs.org/docs/app/building-your-application/caching)
+- [kakaopay - React 18: 리액트 서버 컴포넌트 준비하기](https://tech.kakaopay.com/post/react-server-components/)
+- [React 서버 컴포넌트를 사용해야 하는 이유와 방법](https://www.freecodecamp.org/korean/news/how-to-use-react-server-components/)
