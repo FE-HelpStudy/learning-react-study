@@ -1,0 +1,263 @@
+# 리액트 18 살펴보기
+
+## 동시성 렌더링
+
+- 리액트 18의 가장 큰 변경점은 동시성 지원
+- 과거 렌더링 과정은 한번 시작하면 멈출 수 없는 동기작업이었고, 무조건 결과를 봐야 끝나는 작업이었다. 하지만 18버전부터는 렌더링 중간에 일시 중지한 다음, 나중에 여유가 될 때 다시 시작하거나 진행 중인 렌더링 작업을 포기하고 새로 시작할 수도 있음
+- 랜더링이 복잡해지면서 UI를 일관되게 표시할 수 있도록 하는 훅들이 새로 등장함
+
+
+## 새로 추가된 훅
+
+### useId
+
+- 컴포넌트별로 유니크한 값을 생성하는 훅
+- 서버 사이드와 클라이언트 사이드 간에 동일한 값이 생성되어 하이드레이션 이슈가 발생하지 않음
+  - [관련 PR - id 생성 알고리즘 등](https://github.com/facebook/react/pull/22644)
+- 같은 컴포넌트를 여러번 사용해도 id가 충돌하지 않음
+
+```js
+import { useId } from 'react';
+
+function PasswordField() {
+  const passwordHintId = useId();
+  // ...
+}
+```
+
+### useTransition
+
+- UI 변경을 가로막지 않고 상태를 업데이트할 수 있는 리액트 훅
+- [예시](https://react-ko.dev/reference/react/useTransition#examples)
+
+```js
+import { useTransition } from 'react';
+
+function TabContainer() {
+  const [isPending, startTransition] = useTransition();
+  // ...
+}
+```
+
+- isPending: 상태 업데이트가 진행 중인지를 확인할 수 있는 boolean
+- startTransition: 긴급하지 않은 상태 업데이트로 간주할 set 함수를 넣어둘 수 있는 함수, 반드시 동기함수
+- 느린 랜더링 과정에서 로딩 화면을 보여주거나 혹은 지금 진행 중인 랜더링을 버리고 새로운 상태값으로 다시 렌더링하는 등의 작업이 가능해짐
+
+
+### useDeferredValue
+
+- 리액트 컴포넌트 트리에서 리렌더링이 급하지 않은 부분을 지연할 수 있게 도와주는 훅
+- 디바운스와 비슷하나 고정된 지연 시간이 없이 첫 번째 렌더링이 완료된 이후에 useDefferedValue로 지연된 렌더링을 수행(지연된 렌더링은 중단이 가능하고, 사용자 인터렉션을 차단하지도 않음)
+- 작업이 무겁고 오래 걸릴수록 이 훅을 사용하는 이점이 커짐
+- [예시](https://react-ko.dev/reference/react/useDeferredValue#showing-stale-content-while-fresh-content-is-loading)
+
+```js
+import { useState, useDeferredValue } from 'react';
+
+function SearchPage() {
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  // ...
+}
+```
+
+### useTransition, useDeferredValue 비교
+
+- useTransition은 state 값을 업데이트하는 함수를 감쌌다면, useDeferredValue는 state 값 자체만을 감싸서 사용
+- 낮은 우선순위로 처리해야 할 작업에 대해 직접적으로 상태를 업데이트할 수 있는 코드에 접근할 수 있다면 useTransition
+- 컴포넌트의 props와 같이 상태업데이트에 관여할 수 없고 값만 받아야 하는 상황이라면 useDeferredValue
+
+### useSyncExternalStore
+
+- 일반적인 애플리케이션 코드를 작성할 때는 사용할 일이 없음(상태 관리 라이브러리를 위한 훅)
+- 17버전의 useSubscription이 18버전에서 useSyncExternalStore로 대체됨
+- 대체된 이유? -> 테어링 현상
+  - 테어링이란?
+    리액트에서 하나의 state 값이 있음에도 서로 다른 값을 기준으로 렌더링하는 현상(보통 state, props의 이전과 이후)
+- 리액트 17까지는 테어링이 일어날 여지가 없었으나 앞에서 설명했던 useTransition, useDeferredValue의 훅처럼 렌더링을 일시 중지하거나 뒤로 미루거나 하는 최적화가 가능해지면서 동시성 이슈가 발생할 여지가 생겨버림
+
+![](https://user-images.githubusercontent.com/2440089/124805949-29edc180-df2a-11eb-9621-4cd9c5d0bc5c.png)
+
+- 리액트 내부적으로는 useTransition, useDeferredValue을 통해 이러한 문제를 해결하기 위한 처리를 해두었다.
+- 하지만 리액트가 관리할 수 없는 외부 데이터 소스(글로벌 변수, document.body, window.innerHeight, DOM, 리액트 외부에 상태를 저장하는 외부 상태 관리 라이브러리 등)에 동시성 처리가 추가돼 있지 않다면 테어링 현상이 발생할 수 있다.
+
+```js
+import { useSyncExternalStore } from 'react';
+import { todosStore } from './todoStore.js';
+
+function TodosApp() {
+  const todos = useSyncExternalStore(todosStore.subscribe, todosStore.getSnapshot);
+  // 1. subscribe: 스토어에 있는 값이 변경되면 이 콜백이 호출되어야 한다. -> useSyncExternalStore 은 이 콜백을 통해 컴포넌트를 리렌더한다.
+  // 2. 컴포넌트에 필요한 현재 스토어의 데이터를 반환하는 함수
+  // 3. 옵셔널, 서버 사이트 랜더링 시에 내부 리액트를 하이드레이션하는 도중에 사용, 서버사이드에서 렌더링되는 훅이면 이 값이 필요함(클라이언트에서와 값이 다르면 안됨)
+  // ...
+}
+```
+
+- [사용법 & 예시](https://react-ko.dev/reference/react/useSyncExternalStore#usage)
+- 애플리케이션 코드에서 직접 사용할 일은 많지 않지만 사용 중인 관리 라이브러리가 외부에서 상태를 관리하고 있다면 useSyncExternalStore를 사용하고 있는지 반드시 확인이 필요하다.
+
+### useInsertionEffect
+
+```js
+import { useInsertionEffect } from 'react';
+
+// CSS-in-JS 라이브러리 안에서
+function useCSS(rule) {
+  useInsertionEffect(() => {
+    // ... <style> 태그를 여기에서 주입하세요 ...
+  });
+  return rule;
+}
+```
+
+- CSS-in-js 라이브러리를 위한 훅
+- 기본적인 훅 구조는 useEffect와 동일하다.
+- CSS의 추가 및 수정은 브라우저에서 렌더링하는 작업의 대부분을 다시 게산해 작업해야하는데 이는 리액트 전체 컴포넌트에 영향을 미칠 수 있는 매우 무거운 작업이다. 때문에 리액트 17과 styled-components에서는 클라이언트 렌더링 시에 이 작업이 발생하지 않도록 서버사이드에서 스타일 코드를 삽입했다. 이 작업을 훅으로 처리하는 것이 이전까지 쉽지 않았는데 이를 도와주는 훅이 useInsertionEffect이다.
+- DOM이 실제로 변경되기 전에 동기적으로 실행되어 브라우저가 레이아웃을 계산하기 전에 실행될 수 있게끔 해서 좀 더 자연스러운 스타일 삽입이 가능해진다. -> 브라우저가 다시 스타일을 입혀서 DOM을 계산하지 않아도 됨
+- 라이브러리를 작성하는 경우가 아니라면 참고만 하고 애플리케이션 코드에서는 가급적 사용하지 않는 편이 좋다.
+
+
+## react-dom/client
+
+- 클라이언트에서 리액트 트리를 만들 때 사용되는 API의 변경
+
+### createRoot
+
+- 기존의 react-dom에 있던 render 메서드를 대체할 새로운 메서드
+- 18 기능을 함께 사용하고 싶다면 render와 createRoot를 함께 사용해야함
+
+```js
+import { createRoot } from 'react-dom/client';
+
+const domNode = document.getElementById('root');
+const root = createRoot(domNode);
+
+root.render(<App />);
+```
+
+### hydrateRoot
+
+- 서버 사이드 렌더링 애플리케이션에서 하이드레이션을 하기 위한 새로운 메서드
+
+```js
+import { hydrateRoot } from 'react-dom/client';
+
+const domNode = document.getElementById('root');
+const root = hydrateRoot(domNode, reactNode);
+```
+
+- 대부분의 서버 사이드 랜더링은 프레임워크에 의존하고 있을 것이기 때문에 이 부분을 수정할 일은 거의 없겠지만, 만약 자체적으로 서버 사이드 랜더링을 구현해서 사용하고 있다면 리액트 18로 업데이트할 때 이 부분을 수정해야 한다.
+
+
+## react-dom/server
+
+- 서버에서 컴포넌트를 생성하는 API에 변경
+
+### renderToPipeableStream
+
+- 리액트 컴포넌트를 HTML로 렌더링하는 메서드
+- 스트림을 지원하는 메서드, HTML을 점진적으로 렌더링하고 클라이언트에서는 중간에 script를 삽입하는 등의 작업을 할 수 있다. 이를 통해 서버에서는 Suspense를 사용해 빠르게 렌더링이 필요한 부분을 먼저 렌더링할 수 있고, 값비싼 연산으로 구성된 부분은 이후에 렌더링되게끔 할 수 있다.
+
+```js
+import { renderToPipeableStream } from 'react-dom/server';
+
+const { pipe } = renderToPipeableStream(<App />, {
+  bootstrapScripts: ['/main.js'],
+  onShellReady() {
+    response.setHeader('content-type', 'text/html');
+    pipe(response);
+  }
+});
+```
+
+- renderToPipeableStream을 사용하면 최초에 브라우저는 아직 불러오지 못한 부분을 Suspense의 fallback으로 받는다.
+- 기존에 있던 renderToNodeStream은 무조건 순서대로 렌더링해야하고, 순서에 의존적이기 때문에 이전 렌더링이 완료되지 않으면 이후 렌더링도 끝나지 않았다. 때문에 중간에 오래 걸리는 렌더링 작업이 있다면 전체 렌더링이 연달아 지연되는 문제가 있었다.
+- 하지만 새로 추가된 renderToPipeableStream을 사용하면 순서나 오래 걸리는 렌더링에 영향을 받지 않고 빠르게 렌더링을 수행할 수 있다.
+- 리액트 18에서 제공하는 지연 랜더링을 서버 사이드에서 완전히 사용하기 위해서는 renderToPipeableStream을 사용해야 한다.
+- 다만 직접 서버 사이드 랜더링을 만들어 사용하는 경우가 거의 없을 것이긴 하지만 사용하고자하는 프레임워크에서 리액트 18을 사용하고 싶다면 지원하는지 확인해보는 것이 좋다.
+
+### renderToReadableStream
+
+- renderToPipeableStream이 Node.js 환경에서의 렌더링을 위해 사용한다면, renderToReadableStream은 웹 스트림을 기반으로 작동한다는 차이가 있다.
+- 서버 환경이 아닌 클라우드플레어, 디노 같은 웹 스트림을 사용하는 모던 엣지 런타임 환경에서 사용되는 메서드
+- 마찬가지로 웹 애플리케이션 개발에서는 사용할 일이 거의 없음
+
+## 자동 배치(Automatic Batching)
+
+- 리액트가 여러 상테 업데이트를 하나의 리렌더링으로 묶어서 성능을 향상시키는 방법
+- 리액트 18 이전에는 리액트 내에서의 이벤트들만 자동 배치되었었다. 즉, 프로미스, setTimeout, 네이티브 이벤트 핸들러 또는 다른 이벤트들은 리액트에서 기본적으로 배치를 수행하지 않았다.
+
+```js
+function handleClick() {
+  setCount(c => c + 1);
+  setFlag(f => !f);
+  // -> 한번만 리랜더링 => 배치
+}
+
+setTimeout(() => {
+  setCount(c => c + 1);
+  setFlag(f => !f);
+  // 두번 리랜더링 => 배치 x
+}, 1000);
+
+```
+
+- 리액트 18부터는 createRoot 을 사용하면서 이전에 배치를 지원하지 않았던 이벤트들 포함 모든 업데이트에 자동 배치가 지원된다.
+
+## 더 엄격해진 엄격 모드
+
+### 엄격모드란?
+
+- StrictMode: 잠재적인 버그를 찾는데 도움이 되는 컴포넌트
+- 개발 환경에서 에러가 발생시켜 추후에 발생할 수 있는 에러를 미연에 방지하는 역할을 함(운영 환경에서는 에러가 발생하지 않음)
+
+1. UNSAFE_ 가 붙은 생명주기를 사용하는 컴포넌트에 대한 경고
+    - 리액트 17 버전에서 클래스 컴포넌트의 생명 주기 메서드 중 UNSAFE_가 붙은 componentWillMount, componentWillReceiveProps, componentWillUpdate을 제외하고 나머지는 모두 삭제되었다.
+    - 리액트 18에서는 엄격모드에서 이 세 메서드를 사용할 경우 경고를 준다.
+2. 문자열 ref 사용 금지 
+    - createRef 없이 문자열로 ref를 생성하여 DOM 노드를 참조하는 것을 금지
+      - 문자열 ref 사이에 충돌의 여지가 있음
+      - 어떤 ref에서 참조되고 있는지 파악이 어렵고 리액트가 계속 ref의 값을 추적해야하기 때문에 성능 이슈
+3. [findDomNode](https://ko.react.dev/reference/react-dom/findDOMNode) 사용 경고
+    - 클래스 컴포넌트 인스턴스에서 실제 DOM 요소에 대한 참조를 가져올 수 있는 메서드
+    - 부모가 특정 자식만 별도로 랜더링하는 것이 가능해지기 때문에 자식 컴포넌트의 렌더링을 위해서는 부모 컴포넌트의 렌더링이 일어나야 한다는 리액트의 추상화를 무너뜨림
+    - 항상 첫번째 자식을 반환하는데, Fragment를 사용할 때는 어색해짐
+    - 때문에 createRef, useRef 를 사용하는 방향으로 전환되어 지원 중단
+4. 구 Context API 사용 시 발생하는 경고
+    - childContextTypes, getChildContext를 사용하는 구 리액트 Context API를 사용하면 엄격 모드에서 에러 출력
+5. side-effects 검사
+    - 함수형 프로그래밍 원칙에 따라 리액트의 모든 컴포넌트는 순수하다고 가정하기 때문에 state, props, context가 동일하다면 항상 동일한 JSX 결과물이 반환되어야 한다.
+    - 이를 위반할 경우 잠재적인 버그가 존재할 수 있다고 판단하기 때문에 아래의 내용을 이중으로 호출하여 개발자가 이를 사전에 파악할 수 있도록 유도한다.
+      - 클래스 컴포넌트의 constructor, render, shouldComponentUpdate, getDerivedStateFromProps
+      - 클래스 컴포넌트의 setState의 첫번째 인수
+      - 함수 컴포넌트의 body
+      - useState, useMemo, useReducer에 전달되는 함수
+
+
+### 리액트 18에서 추가된 엄격모드
+
+- 컴포넌트가 렌더링 트리에 존재하지 않는 상태에서도 컴포넌트 내부의 상태값을 유지할 수 있는 기능을 제공할 예정으로 이를 향후에 지원하기 위해 엄격 모드에 새로운 기능이 추가되었다.
+  ex. 사용자가 뒤로가기 했다가 다시 현재 화면으로 돌아왔을 때 리액트가 즉시 이전의 상태를 그대로 유지해 표시할 준비를 하는 기능
+- 리액트 18 이후에서 엄격 모드가 켜져있을 경우 컴포넌트가 최초에 마운트될 때 자동으로 모든 컴포넌트를 마운트 해제하고 두번째 마운트에서 이전 상태를 복원하는 기능이 추가되었다.
+- 이 결과로 useEffect가 두번 실행되게 되는데, 이후의 업데이트에 대비하기 위해 두 번의 useEffect 호출에도 자유로운 컴포넌트를 작성하는 것이 좋다.
+  - **[필요한 경우에만 useEffect를 사용하고](https://ko.react.dev/learn/you-might-not-need-an-effect), 적절한 cleanup 함수를 배치**
+
+## Suspense 기능 강화
+
+- 16.6 버전에서 실험 버전으로 도입된 기능으로, 컴포넌트를 동적으로 가져올 수 있게 도와준다.
+- lazy, Suspense가 한 쌍으로 사용되고, 애플리케이션에서 상대적으로 중요하지 않은 컴포넌트를 분할해 초기 렌더링 속도를 향상시키는 데 많은 도움을 줬다.
+  - [사용법 & 예시](https://ko.react.dev/reference/react/Suspense#usage)
+- 리액트 18에서는 기존에 있던 문제들이 개선되었고 실험 단계에서 정식으로 올라왔다.
+  - 컴포넌트가 화면에 보이기 전에 effect가 실행되는 문제 수정
+  - Suspense에 의해 컴포넌트가 보이거나 사라질 때도 effect 실행
+  - 서버에서도 실행 가능
+  - 화면이 너무 자주 업데이트되어 시각적으로 방해 받는 것을 방지하기 위해 Suspense 내에 스로틀링 추가
+- 그럼에도 여전히 React.lazy를 사용해 컴포넌트를 지연시켜 불러오거나, Next.js 같은 Suspense를 지원하는 프레임워크에서만 사용이 가능해서 Suspense를 사용할 수 있는 시나리오가 제한적인 편이다.
+  - 추후 Promise를 바로 사용할 수 있는 use 훅을 활용하여 Suspense를 활용하는 방법이 업데이트될 가능성이 있음
+
+## 그 외
+
+- 인터넷 익스플로러 지원이 중단되면서 이에 대한 지원이 필요하다면 프로젝트에 별도로 폴리필과 트렌스파일을 신경써 주어야 한다.
+- 컴포넌트가 undefined를 반환해도 null과 동일하게 처리
+- renderToNodeStream 지원 중단
