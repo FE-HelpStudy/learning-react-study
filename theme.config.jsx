@@ -6,7 +6,7 @@ const githubImageURL = {
   "worker" : "https://github.com/goldmayo.png",
   "epik" : "https://github.com/BoubleJ.png",
   "hyeonzii": "https://github.com/hyeonzii.png",
-  "kolin": "https://github.com/hyeonzii.png",
+  "korin": "https://github.com/hyeonzii.png",
   "moana": "https://github.com/Joseunghyo7742.png",
   "bella": "https://github.com/yunjiisy.png",
   "oliv": "https://github.com/busy-joj.png",

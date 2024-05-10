@@ -16,5 +16,8 @@
   },
   "modern-react-deep-dive" : {
     "title" : "모던 리액트 Deep Dive"
+  },
+  "modern-js-deep-dive" : {
+    "title" : "모던 자바스크립트 Deep Dive"
   }
 }
