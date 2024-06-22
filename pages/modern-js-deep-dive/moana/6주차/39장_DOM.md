@@ -394,6 +394,5 @@ Node.prototype.paraneNode 사용
 |---|---|
 |Node.prototype.previousSibiling| 부모 노드가 같은 형제 노드 중 자신의 이전 형제 노드를 탐색해 반환. 요소노드 뿐만 아니라 텍스트 노드일 수 있음|
 |Node.prototype.nextSibling|부모 노드가 같은 형제 노드 중 자신의 다음 형제 노드를 탐색해 반환. 요소노드 뿐만 아니라 텍스트 노드일 수 있음|
-|Element.prototype.previousElementSibiling|
-위와 같으나 요소노드만 반환|
-| Element.prototype.nextElementSibling| 요소마드만 반환| 
+|Element.prototype.previousElementSibiling |위와 같으나 요소 노드만 반환 |
+| Element.prototype.nextElementSibling| 요소노드만 반환| 
