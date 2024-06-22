@@ -6,8 +6,8 @@
 
 ### HTML 요소와 노드 객체
 
-![alt text](image.png)
-![alt text](image-1.png)
+![alt text](./image.png)
+![alt text](./image-1.png)
 
 - HTML요소는 HTML 문서를 구성하는 개별적인 요소
 - 렌더링 엔진에 의해 요소는 파싱되어 DOM을 구성하는 요소 노드 객체로 변환됨
@@ -26,14 +26,14 @@
 ### 노드 객체의 상속 구조
 
 DOM을 구성하는 노드 객체는 ECMAScript 사양에 정의된 표준 빌트인 객체가 아닌 브라우저 환경에서 추가적으로 제공하는 호스트 객체다. 하지만 노드 객체도 자바스크립트 객체로 프로토타입에 의한 상속 구조를 갖는다.
-![alt text](image-2.png)
+![alt text](./image-2.png)
 
 - 그림처럼 모든 노드 객체는 `Object, EventTarget, Node` 인터페이스를 상속받는다
 - 문서 노드는 `Document, HTMLDocument` 인터페이스를 상속 받고
 - 어트리뷰트 노드는 `Attr`, 텍스트 노드는 `CharaterData`, 요소노드는 `Element` 인터페이스를 상속받는다.
   <br><br>
 
-![alt text](image-3.png)
+![alt text](./image-3.png)
 
 - 예를 들어 input 요소 노드 객체는 `HTMLInputElement, HTMLElement, Element, Node, EventTarget, Object` 의 프로토타입에 바인딩되어 있는 프로토타입 객체를 상속받는다. 즉, input 요소 노드 객체는 프로토타입 체인에 있는 모든 프로토타입의 프로퍼티나 메서드를 상속받는다.
 
