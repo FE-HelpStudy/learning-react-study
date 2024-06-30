@@ -279,7 +279,7 @@ DOM 컬렉션 객체인 HTMLCollection과 NodeList는 DOM API가 여러 개의 �
 
 
 ## 📖 3. 노드 탐색
-요소 노드를 취득한 다음, 취득한 요소 노드를 기점으로 DOM 트리의 노드를 옮겨 다니며 부모, 형제, 자식 노드 등을 탐색해야할 때가 있음.
+요소 노드를 취득한 다음, 취득한 요소 **노드를** 기점으로 DOM 트리의 노드를 옮겨 다니며 부모, 형제, 자식 노드 등을 탐색해야할 때가 있음.
 > DOM 트리 상의 노드를 탐색할 수 있도록 Node, Element 인터페이스는 트리 탐색 프로퍼티를 제공한다.
 
 - Node.prototype 제공: `parentNode, previoustSibling, firstChild, childNodes` 프로퍼티
